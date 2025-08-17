@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="style.css">
+<script src="script.js" defer></script>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Phasmophobia Ghost Filter — Interactive Checklist</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="wrap title">
+      <h1>Phasmophobia Ghost Filter</h1>
+      <div class="mode">
+        <label for="difficulty">Difficulty</label>
+        <select id="difficulty">
+          <option>Amateur</option>
+          <option>Intermediate</option>
+          <option selected>Professional</option>
+          <option>Nightmare</option>
+          <option>Insanity</option>
+        </select>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <aside class="panel" id="controls">
+      <h2>Filters</h2>
+      <div class="toolbar" id="toolbar">
+        <label class="tog"><input type="checkbox" id="compactToggle"> Compact</label>
+        <span style="flex:1"></span>
+        <label class="tog"><input type="checkbox" id="collapseAll"> Collapse all</label>
+      </div>
+      <div class="inner" id="filtersRoot">
+        <details class="group" id="grp-evidence-yes" open>
+          <summary>Observed Evidence</summary>
+          <div class="content">
+            <div class="chips" id="evidence-yes"></div>
+            <p class="help">Select all evidence you <strong>have</strong> seen.</p>
+          </div>
+        </details>
+
+        <details class="group" id="grp-evidence-no">
+          <summary>Not Seen / Ruled Out</summary>
+          <div class="content">
+            <div class="chips" id="evidence-no"></div>
+            <label class="tog" style="margin-top:8px"><input type="checkbox" id="strictNo"> Strictly remove ghosts requiring these</label>
+            <p class="help">Turn this <em>off</em> for Nightmare/Insanity (hidden evidence possible).</p>
+          </div>
+        </details>
+
+        <details class="group" id="grp-behaviour-exclude">
+          <summary>Behaviour — Rule Outs</summary>
+          <div class="content">
+            <div class="chips" id="behaviour-exclude"></div>
+          </div>
+        </details>
+
+        <details class="group" id="grp-behaviour-require">
+          <summary>Behaviour — Hard Tells</summary>
+          <div class="content">
+            <div class="chips" id="behaviour-require"></div>
+            <p class="help">Note: <strong>The Mimic</strong> can copy many behaviours. If you find <em>DOTS, EMF 5, or Ghost Writing</em>, it cannot be a Mimic.</p>
+          </div>
+        </details>
+		<!-- Movement Filters -->
+<details class="group" id="grp-movement">
+  <summary>Movement Filters</summary>
+  <div class="content">
+    <label class="chip" title="Show only ghosts that speed up with line of sight (includes Jinn & Revenant)">
+      <input type="checkbox" id="filterLoS"> Line-of-sight acceleration
+    </label>
+    <p class="help">Filters to ghosts that increase speed under LoS (standard LoS accel or special LoS-based speed like Jinn/Revenant).</p>
+  </div>
+</details>
+
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="reset">Reset</button>
+        <button class="btn" id="copy">Copy Remaining</button>
+      </div>
+    </aside>
+
+    <section class="panel" id="results">
+      <div class="bar">
+        <div class="count"><span id="count">24</span> ghosts remain</div>
+        <div class="actions">
+          <label class="tog"><input type="checkbox" id="showRemoved"> Show eliminated</label>
+          <button class="btn" id="share">Share link</button>
+        </div>
+      </div>
+      <div class="grid" id="grid"></div>
+
+      <!-- Ghost Detail Modal -->
+      <dialog id="ghostModal">
+        <div class="gm-head">
+          <div style="display:flex;align-items:center;gap:10px">
+            <h3 id="gm-title" style="margin:0;font-size:1.05rem"></h3>
+            <div id="gm-ev" class="gm-ev"></div>
+          </div>
+          <button class="btn" id="gm-close">Close</button>
+        </div>
+        <div class="gm-body">
+          <div class="gm-sec">
+            <h4>Hunt Threshold & Conditions</h4>
+            <div id="gm-th"></div>
+          </div>
+          <div class="gm-sec">
+            <h4>Unique Traits & Tells</h4>
+            <ul id="gm-traits" style="margin:0;padding-left:18px"></ul>
+          </div>
+          <div class="gm-sec">
+            <h4>Strategy Highlights</h4>
+            <ol id="gm-plan" style="margin:0;padding-left:18px"></ol>
+          </div>
+        </div>
+      </dialog>
+
+      <details class="reasons" id="removedBox" hidden>
+        <summary>Eliminated ghosts (with reasons)</summary>
+        <div id="removedList" style="display:grid;gap:8px;margin-top:8px"></div>
+      </details>
+    </section>
+  </main>
+
+  <div class="tips" id="tipsBox">
+    <h2>Investigation Tips <span class="muted" id="tipsMeta"></span></h2>
+    <ul id="tipsList"></ul>
+    <div class="ai-row">
+      <button class="btn" id="planBtn" disabled title="Add filters until 5 or fewer ghosts remain">Generate Strategies</button>
+      <span class="help">Generates step-by-step plans (no AI). Enabled at ≤ 5 remaining ghosts.</span>
+    </div>
+    <details id="planPanel" class="tips" open hidden>
+      <summary><strong>Strategy Plans</strong> <span class="muted">— tailored to your remaining ghosts & difficulty</span></summary>
+      <div id="plansOut" style="margin-top:10px;display:grid;gap:10px"></div>
+    </details>
+  </div>
+
+  <div class="tools">
+    <section class="tool" id="smudgeTool">
+      <h3>Smudge Timer</h3>
+      <div class="inline">
+        <label>Preset
+          <select id="smudgePreset" class="inputish">
+            <option value="90">Normal (90s)</option>
+            <option value="180">Spirit Test (3:00)</option>
+            <option value="120">Demon Shorter (~120s)</option>
+            <option value="custom">Custom…</option>
+          </select>
+        </label>
+        <input id="smudgeCustom" type="number" min="10" max="600" step="5" placeholder="Seconds" class="inputish" style="width:110px;display:none">
+        <button class="btn" id="smudgeStart">Start</button>
+        <button class="btn" id="smudgeStop" disabled>Stop</button>
+        <button class="btn" id="smudgeReset">Reset</button>
+        <span class="help" id="smudgeLabel">Blocks hunts for the timer duration — use to test <strong>Spirit</strong> (~3:00) vs normal.</span>
+      </div>
+      <div class="timer">
+        <div class="progress"><div class="barfill" id="smudgeBar"></div></div>
+        <div id="smudgeTime" style="min-width:60px;text-align:right;font-variant-numeric:tabular-nums">00:00</div>
+      </div>
+    </section>
+
+    <section class="tool" id="thresholdTool">
+      <h3>Hunt Threshold Guide</h3>
+      <div class="rows" id="thresholdRows"></div>
+    </section>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

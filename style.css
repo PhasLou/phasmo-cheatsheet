@@ -119,5 +119,31 @@ details.group.dragging summary { cursor: grabbing; }
 }
 .drop-marker{ height:0; border-top:2px dashed var(--accent); margin:6px 0; }
 .reorder-box .btn { min-width: 0; }
+#siteBanner {
+  background: #ffcc00;
+  color: #222;
+  padding: 8px 12px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 14px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+#siteBanner button {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 5px;
+}
 
 }
+

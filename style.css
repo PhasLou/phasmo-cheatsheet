@@ -144,6 +144,12 @@ details.group.dragging summary { cursor: grabbing; }
   line-height: 1;
   padding: 0 5px;
 }
-
+.btn.danger{
+  background:#3b0f0f;
+  border-color:#5a1a1a;
+}
+.btn.danger:hover{
+  background:#521616;
 }
 
+}

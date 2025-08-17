@@ -201,6 +201,61 @@ function behChip(b,type){
   c.append(input,$make('span',{innerHTML:`<strong>${b.label}</strong>`}));
   return c;
 }
+// Track last tip action for quick undo
+let lastTipAction = null;
+function isHookActive(hook){
+  if(!hook) return false;
+  if(hook.type==='require') return state.require.has(hook.id);
+  if(hook.type==='exclude') return state.exclude.has(hook.id);
+  return false;
+}
+function applyHook(hook, makeActive){
+  if(hook.type==='require'){
+    makeActive ? state.require.add(hook.id) : state.require.delete(hook.id);
+  } else if(hook.type==='exclude'){
+    makeActive ? state.exclude.add(hook.id) : state.exclude.delete(hook.id);
+  }
+}
+function toastWithUndo(msg, undoFn){
+  const box = document.createElement('div');
+  box.style.position='fixed';
+  box.style.left='50%';
+  box.style.bottom='24px';
+  box.style.transform='translateX(-50%)';
+  box.style.background='#ffcc00';        // bright yellow
+  box.style.border='2px solid #d4a017';  // darker gold border
+  box.style.color='#222';
+  box.style.padding='10px 14px';
+  box.style.fontWeight='bold';
+  box.style.fontSize='14px';
+  box.style.borderRadius='8px';
+  box.style.boxShadow='0 6px 20px rgba(0,0,0,.35)';
+  box.style.display='flex';
+  box.style.alignItems='center';
+  box.style.gap='12px';
+  box.style.zIndex='2000';
+
+  const span=document.createElement('span');
+  span.textContent=msg;
+
+  const undo=document.createElement('button');
+  undo.className='btn';
+  undo.textContent='Undo';
+  undo.style.background='#222';
+  undo.style.color='#fff';
+  undo.style.padding='4px 10px';
+  undo.style.borderRadius='4px';
+
+  undo.addEventListener('click',()=>{
+    try{ undoFn?.(); }finally{ box.remove(); }
+  });
+
+  box.append(span,undo);
+  document.body.appendChild(box);
+  setTimeout(()=>box.remove(), 10000);
+
+}
+
 
 // Movement predicate (for LoS filter)
 function ghostHasLoSAccel(name){
@@ -330,17 +385,32 @@ function updateSmartTips(kept){
     const li=document.createElement('li');
     li.innerHTML = `${tip.text} <span class="pill">Targets: ${overlap.join(', ')}</span>`;
     if(tip.hook){
+      const active = isHookActive(tip.hook);
       const btn=document.createElement('button');
-      btn.className='btn'; btn.style.marginLeft='8px'; btn.textContent='Mark observed';
+      btn.className='btn';
+      btn.style.marginLeft='8px';
+      btn.textContent = active ? 'Unmark' : 'Mark observed';
+
       btn.addEventListener('click',()=>{
-        if(tip.hook.type==='require') state.require.add(tip.hook.id);
-        if(tip.hook.type==='exclude') state.exclude.add(tip.hook.id);
-        render();
+        const wasActive = isHookActive(tip.hook);
+        // save undo info
+        lastTipAction = { hook: tip.hook, previous: wasActive };
+        // toggle
+        applyHook(tip.hook, !wasActive);
+        persist(); render();
+
+        toastWithUndo(wasActive ? 'Unmarked.' : 'Marked observed.', ()=>{
+          // undo to previous state
+          applyHook(tip.hook, lastTipAction.previous);
+          persist(); render();
+        });
       });
+
       li.appendChild(btn);
     }
     list.appendChild(li);
   });
+
 }
 
 // ---------- Strategy Planner (offline) ----------
@@ -887,4 +957,3 @@ render();
     banner.style.display = 'none';
   });
 })();
-

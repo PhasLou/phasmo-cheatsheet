@@ -875,3 +875,16 @@ if(!localStorage.getItem('phasmo-filter-v1') && !loadedFromHash){
 }
 $('#strictNo').checked = state.strictNo;
 render();
+// ---------- Site Banner ----------
+(function(){
+  const banner = document.getElementById('siteBanner');
+  const closeBtn = document.getElementById('bannerClose');
+
+  if (!banner || !closeBtn) return;
+
+  // Close button hides banner for current session
+  closeBtn.addEventListener('click', () => {
+    banner.style.display = 'none';
+  });
+})();
+

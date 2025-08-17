@@ -858,6 +858,42 @@ $('#planBtn').addEventListener('click',()=>{
   document.getElementById('planPanel').hidden = false;
   document.getElementById('planPanel').scrollIntoView({behavior:'smooth',block:'start'});
 });
+// ---------- Hard Reset (wipe all saved state, order, hash) ----------
+function hardReset(){
+  if(!confirm('Reset ALL settings and saved data? This will clear local storage, filter order, and share links.')) return;
+
+  // Remove our saved keys
+  try{
+    localStorage.removeItem('phasmo-filter-v1');
+    localStorage.removeItem('phasmo-filter-order-v1');
+    // Safety: remove any other future "phasmo-" keys
+    for(let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i);
+      if(k && /^phasmo-/.test(k)){ localStorage.removeItem(k); i--; }
+    }
+  }catch{}
+
+  // Clear URL hash so bad share links don’t soft-lock
+  if(location.hash){ history.replaceState(null,'',location.pathname+location.search); }
+
+  // Full reload to ensure a pristine state
+  location.reload();
+}
+
+// Add a Reset ALL button next to your existing Reset
+(function injectHardReset(){
+  const row = document.querySelector('.btn-row');
+  if(!row || document.getElementById('hardResetBtn')) return;
+  const btn = document.createElement('button');
+  btn.id = 'hardResetBtn';
+  btn.className = 'btn danger';
+  btn.title = 'Clear ALL saved data & reload';
+  btn.textContent = 'Reset ALL';
+  btn.addEventListener('click', hardReset);
+  row.appendChild(btn);
+})();
+
+
 // LoS filter checkbox
 const losCb = document.getElementById('filterLoS');
 if(losCb){

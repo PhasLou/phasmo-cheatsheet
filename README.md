@@ -40,11 +40,5 @@ All data stored client-side (no backend)
 This project is a fan-made tool and is not affiliated with or endorsed by Kinetic Games.
 All game mechanics and ghost behaviours are based on public information from the community and testing.
 
-📌 Future Ideas
 
-Active user count (see how many hunters are online)
-
-Configurable banners for updates/bug notices
-
-Integration with external guides
 ---

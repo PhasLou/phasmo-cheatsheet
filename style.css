@@ -151,5 +151,122 @@ details.group.dragging summary { cursor: grabbing; }
 .btn.danger:hover{
   background:#521616;
 }
+/* Highlight the final candidate tile */
+.ghost.solved{
+  border-color:#22c55e;
+  background:linear-gradient(180deg, rgba(34,197,94,.15), rgba(0,0,0,.0)) , #131c29;
+  box-shadow:0 0 0 2px rgba(34,197,94,.25), 0 12px 30px rgba(0,0,0,.35);
+  position:relative;
+}
+.ghost .solvedPrompt{
+  position:absolute; left:10px; right:10px; bottom:10px;
+  background:#0e1a12; border:1px solid #1f8f4f; color:#c7f9d2;
+  padding:6px 8px; border-radius:8px; font-size:.78rem;
+  display:flex; align-items:center; gap:8px; pointer-events:none;
+}
+.ghost .pulse{
+  width:10px;height:10px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 0 rgba(34,197,94,.8);
+  animation:pulse 1.6s infinite;
+}
+@keyframes pulse{ 0%{box-shadow:0 0 0 0 rgba(34,197,94,.6)} 70%{box-shadow:0 0 0 10px rgba(34,197,94,0)} 100%{box-shadow:0 0 0 0 rgba(34,197,94,0)} }
+
+/* Modal checklist banner */
+.gm-check{
+  display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border-radius:10px;
+  background:#0e1a12; border:1px solid #1f8f4f; color:#c7f9d2; font-size:.88rem;
+}
+.gm-check ul{ margin:6px 0 0; padding-left:18px; }
+.gm-check .muted{ opacity:.9 }
+/* Final Check section container */
+#gm-check-sec {
+  margin-top: 20px;   /* pushes it away from evidence */
+}
+
+/* The green checklist box itself */
+.gm-check{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  padding:12px 14px;
+  border-radius:10px;
+  background:#0e1a12;
+  border:1px solid #1f8f4f;
+  color:#c7f9d2;
+  font-size:.9rem;
+  line-height:1.4;
+}
+.gm-check ul{
+  margin:8px 0 0;
+  padding-left:18px;
+}
+.gm-check .muted{ opacity:.9 }
+
+.gm-body{ gap:16px; }
+.gm-body > :first-child{ margin-top:12px; } /* extra room under the header */
+#gm-check-sec{ margin-top:16px; margin-bottom:12px; } /* redundant but fine */
+/* More breathing room between the evidence header and the body */
+#ghostModal .gm-head{
+  padding-bottom:12px;
+  border-bottom:1px solid var(--border);
+}
+#ghostModal .gm-body{
+  padding-top:14px;
+  gap:16px; /* increases spacing between sections too */
+}
+
+/* Make sure the Final Check section has some margin */
+#gm-check-sec{ margin-top:16px; margin-bottom:12px; }
+#ghostModal .gm-head { flex-wrap: wrap; row-gap: 10px; }
+#ghostModal .gm-body { padding-top: 16px; }
+.ghost .solvedPrompt{
+  display:block;
+  clear:both;
+  margin:6px 0 10px;
+  background:#d4f8d4;
+  border:1px solid #6c6;
+  border-radius:4px;
+  padding:6px;
+  font-size:.85rem;
+}
+.ghost .solvedPrompt .pulse{ margin-right:6px; }
+
+}
+/* Evidence row always leaves space */
+.ghost .meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:4px;
+  margin: 6px 0 8px;         /* ensure space below evidence */
+}
+
+/* Solved banner: sits under evidence, no overlay */
+.ghost .solvedPrompt{
+  position: static;          /* not absolute */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin: 6px 0 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #29a36a;
+  background: rgba(41,163,106,0.15);  /* subtle green, not opaque */
+  color: #cfe3ff;             /* readable on dark bg */
+  box-shadow: none;
+}
+
+/* Green outline on solved card */
+.ghost.solved{
+  outline: 2px solid #29a36a;
+  outline-offset: 0;
+}
+
+/* Tiny dot animation (optional) */
+.solvedPrompt .pulse{
+  width:10px; height:10px; border-radius:50%;
+  background:#29a36a; flex:0 0 10px;
+  box-shadow:0 0 8px rgba(41,163,106,.8);
+}
+
 
 }

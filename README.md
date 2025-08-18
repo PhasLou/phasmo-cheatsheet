@@ -19,7 +19,7 @@ This site helps you track evidence, filter possible ghosts, check hunt threshold
   Useful guidance for narrowing down suspects, with the option to “mark as observed” — and an undo if misclicked.
 
 - **Filters & Customisation**  
-  Drag and reorder filters to prioritise your own investigation style (e.g., LOS acceleration, hunt behaviour, etc).
+  Reorder filters to prioritise your own investigation style (e.g., LOS acceleration, hunt behaviour, etc).
 
 - **Reset Button**  
   Reset the entire page if you get soft-locked or want to start fresh.

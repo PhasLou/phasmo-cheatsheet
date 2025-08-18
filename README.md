@@ -26,5 +26,25 @@ This site helps you track evidence, filter possible ghosts, check hunt threshold
 
 - **Responsive Design**  
   Works on desktop tablets - Mobile is WIP.
+---
+🛠 Tech Stack
 
+HTML / CSS / JavaScript (vanilla)
+
+No external frameworks required
+
+All data stored client-side (no backend)
+
+⚠️ Disclaimer
+
+This project is a fan-made tool and is not affiliated with or endorsed by Kinetic Games.
+All game mechanics and ghost behaviours are based on public information from the community and testing.
+
+📌 Future Ideas
+
+Active user count (see how many hunters are online)
+
+Configurable banners for updates/bug notices
+
+Integration with external guides
 ---

@@ -185,7 +185,8 @@ const SMART_TIPS=[
 ];
 
 /* ---------- State & helpers ---------- */
-const state={yes:new Set(),no:new Set(),exclude:new Set(),require:new Set(),strictNo:false,showRemoved:false,difficulty:'Professional',filterLoS:false};
+const state={yes:new Set(),no:new Set(),exclude:new Set(),require:new Set(),strictNo:false,showRemoved:false,difficulty:'Professional',filterLoS:false,
+  filterSpeedChange:false};
 
 const $=s=>document.querySelector(s);
 const $$=s=>Array.from(document.querySelectorAll(s));
@@ -236,8 +237,39 @@ function ghostHasLoSAccel(name){
   return false;
 }
 
+
+
+/* Speed-change predicate */
+function ghostHasSpeedChange(name){
+    if (name === 'The Mimic') return true;
+const d = SPEEDS[name] || SPEEDS.Standard;
+  if(!d) return false;
+  // Range implies conditional speed (e.g., Hantu, Moroi, Deogen, Thaye)
+  if (Array.isArray(d.range) && d.range.length === 2 && d.range[1] > d.range[0]) return true;
+  // Two distinct fixed speeds (e.g., Twins)
+  if (Array.isArray(d.pair) && d.pair.length >= 2) {
+    const first = d.pair[0]?.speed;
+    if (d.pair.some(p => p.speed !== first)) return true;
+  }
+  // LoS-cap or fixed faster state (e.g., Jinn 2.5, Revenant 3.0, Raiju 2.5)
+  if (typeof d.losCap === 'number') return true;
+  if (Array.isArray(d.fixed) && d.fixed.some(f => typeof f.speed === 'number' && f.speed > (d.base ?? 1.7))) return true;
+  // Otherwise treat as no special speed change
+  return false;
+}
 /* Filtering */
+    if(state.filterSpeedChange && !ghostHasSpeedChange(g.name)) why.push('Filtered out: no conditional speed change');
 function filterGhosts(){
+  // Shortcut: if Speed-Change filter is ON and no other filters are active,
+  // show ALL speed-changing ghosts (ignore evidence/behavior filters).
+  const noEvidence = state.yes.size===0 && state.no.size===0;
+  const noBehaviors = state.exclude.size===0 && state.require.size===0;
+  const noStrict = !state.strictNo;
+  if (state.filterSpeedChange && noEvidence && noBehaviors && noStrict) {
+    const kept = GHOSTS.filter(g => ghostHasSpeedChange(g.name));
+    return { kept, removed: [], reasons: new Map() };
+  }
+
   const reasons=new Map();
   const reqSets=Array.from(state.require).map(id=>BEHAVIOURS.require.find(x=>x.id===id)?.ghosts||[]);
   let requiredPool=null; if(reqSets.length){ requiredPool=new Set(reqSets[0]); for(let i=1;i<reqSets.length;i++){ requiredPool=new Set([...requiredPool].filter(g=>reqSets[i].includes(g))); } }
@@ -249,7 +281,11 @@ function filterGhosts(){
     if(!hasAllYes){ const miss=Array.from(state.yes).filter(ev=> !(g.ev.includes(ev) || (g.name==='The Mimic' && ev==='Ghost Orbs'))); if(miss.length) why.push('Missing observed evidence: '+miss.join(', ')); }
     if(state.strictNo){ const bad=Array.from(state.no).filter(ev=> g.ev.includes(ev) && !(g.name==='The Mimic' && ev==='Ghost Orbs')); if(bad.length) why.push('Requires ruled-out evidence: '+bad.join(', ')); }
     BEHAVIOURS.exclude.forEach(b=>{ if(state.exclude.has(b.id) && b.ghosts.includes(g.name)) why.push('Ruled out by behavior: '+b.label); });
-    if(state.filterLoS && !ghostHasLoSAccel(g.name)) why.push('Filtered out: no LoS speed increase');
+    if (state.filterSpeedChange) {
+      if (!ghostHasSpeedChange(g.name)) why.push('Filtered out: no conditional speed change');
+    } else if (state.filterLoS) {
+      if (!ghostHasLoSAccel(g.name)) why.push('Filtered out: no LoS speed increase');
+    }
     if(why.length){ reasons.set(g.name,why); eliminated.push(g); } else out.push(g);
   });
   return {kept:out,removed:eliminated,reasons};
@@ -474,9 +510,9 @@ function showGhost(name){
 $('#gm-close')?.addEventListener('click',()=>{ const modal=$('#ghostModal'); if(typeof modal?.close==='function'){ modal.close(); } else { modal?.removeAttribute('open'); } });
 
 /* Persistence & UI */
-function persist(){ const obj={yes:[...state.yes],no:[...state.no],exclude:[...state.exclude],require:[...state.require],strictNo:state.strictNo,showRemoved:state.showRemoved,difficulty:state.difficulty,filterLoS:state.filterLoS}; try{ localStorage.setItem('phasmo-filter-v1',JSON.stringify(obj)); }catch{} }
-function restore(){ try{ const raw=localStorage.getItem('phasmo-filter-v1'); if(!raw) return; const o=JSON.parse(raw); state.yes=new Set(o.yes||[]); state.no=new Set(o.no||[]); state.exclude=new Set(o.exclude||[]); state.require=new Set(o.require||[]); state.strictNo=!!o.strictNo; state.showRemoved=!!o.showRemoved; state.difficulty=o.difficulty||'Professional'; state.filterLoS=!!o.filterLoS; const difSel=$('#difficulty'); if(difSel) difSel.value=state.difficulty; const cb=$('#filterLoS'); if(cb) cb.checked=state.filterLoS; }catch{} $$('#evidence-yes .chip input').forEach((inp,i)=>{ const label=EVIDENCE[i]; inp.checked=state.yes.has(label); }); $$('#evidence-no .chip input').forEach((inp,i)=>{ const label=EVIDENCE[i]; inp.checked=state.no.has(label); }); $$('#behaviour-exclude .chip input').forEach((inp,i)=>{ const id=BEHAVIOURS.exclude[i].id; inp.checked=state.exclude.has(id); }); $$('#behaviour-require .chip input').forEach((inp,i)=>{ const id=BEHAVIOURS.require[i].id; inp.checked=state.require.has(id); }); const strict=$('#strictNo'); if(strict) strict.checked=state.strictNo; }
-function restoreFromHash(){ if(!location.hash) return false; try{ const o=JSON.parse(decodeURIComponent(atob(location.hash.slice(1)))); state.yes=new Set(o.y||[]); state.no=new Set(o.n||[]); state.exclude=new Set(o.x||[]); state.require=new Set(o.r||[]); state.strictNo=!!o.sn; state.difficulty=o.d||'Professional'; state.filterLoS=!!o.l; const difSel=$('#difficulty'); if(difSel) difSel.value=state.difficulty; const cb=$('#filterLoS'); if(cb) cb.checked=state.filterLoS; return true; }catch{return false;} }
+function persist(){ const obj={yes:[...state.yes],no:[...state.no],exclude:[...state.exclude],require:[...state.require],strictNo:state.strictNo,showRemoved:state.showRemoved,difficulty:state.difficulty,filterLoS:state.filterLoS,filterSpeedChange:state.filterSpeedChange};; try{ localStorage.setItem('phasmo-filter-v1',JSON.stringify(obj)); }catch{} }
+function restore(){ try{ const raw=localStorage.getItem('phasmo-filter-v1'); if(!raw) return; const o=JSON.parse(raw); state.yes=new Set(o.yes||[]); state.no=new Set(o.no||[]); state.exclude=new Set(o.exclude||[]); state.require=new Set(o.require||[]); state.strictNo=!!o.strictNo; state.showRemoved=!!o.showRemoved; state.difficulty=o.difficulty||'Professional'; state.filterLoS=!!o.filterLoS;  state.filterSpeedChange = !!o.filterSpeedChange; const difSel=$('#difficulty'); if(difSel) difSel.value=state.difficulty; const cb=$('#filterLoS'); if(cb) cb.checked=state.filterLoS; }catch{} $$('#evidence-yes .chip input').forEach((inp,i)=>{ const label=EVIDENCE[i]; inp.checked=state.yes.has(label); }); $$('#evidence-no .chip input').forEach((inp,i)=>{ const label=EVIDENCE[i]; inp.checked=state.no.has(label); }); $$('#behaviour-exclude .chip input').forEach((inp,i)=>{ const id=BEHAVIOURS.exclude[i].id; inp.checked=state.exclude.has(id); }); $$('#behaviour-require .chip input').forEach((inp,i)=>{ const id=BEHAVIOURS.require[i].id; inp.checked=state.require.has(id); }); const strict=$('#strictNo'); if(strict) strict.checked=state.strictNo; }
+function restoreFromHash(){ if(!location.hash) return false; try{ const o=JSON.parse(decodeURIComponent(atob(location.hash.slice(1)))); state.yes=new Set(o.y||[]); state.no=new Set(o.n||[]); state.exclude=new Set(o.x||[]); state.require=new Set(o.r||[]); state.strictNo=!!o.sn; state.difficulty=o.d||'Professional'; state.filterLoS=!!o.l; state.filterSpeedChange = !!o.sc; const difSel=$('#difficulty'); if(difSel) difSel.value=state.difficulty; const cb=$('#filterLoS'); if(cb) cb.checked=state.filterLoS; return true; }catch{return false;} }
 
 /* Events */
 $('#difficulty')?.addEventListener('change',e=>{ state.difficulty=e.target.value; const cfg=DIFFICULTY[state.difficulty]; const strict=$('#strictNo'); if(strict){ strict.checked=state.strictNo=cfg.strictNoDefault; } persist(); render(); });
@@ -486,11 +522,24 @@ $('#strictNo')?.addEventListener('change',e=>{ state.strictNo=e.target.checked; 
 $('#showRemoved')?.addEventListener('change',e=>{ state.showRemoved=e.target.checked; persist(); render(); });
 $('#reset')?.addEventListener('click',()=>{ state.yes.clear(); state.no.clear(); state.exclude.clear(); state.require.clear(); const cfg=DIFFICULTY[state.difficulty]; state.strictNo=cfg.strictNoDefault; const strict=$('#strictNo'); if(strict) strict.checked=state.strictNo; $$('#filtersRoot .chip input').forEach(i=>i.checked=false); persist(); render(); });
 $('#copy')?.addEventListener('click',()=>{ const {kept}=filterGhosts(); const txt=kept.map(g=>g.name).join(', '); navigator.clipboard.writeText(txt).then(()=>flash('Copied remaining ghosts')); });
-$('#share')?.addEventListener('click',()=>{ const obj={y:[...state.yes],n:[...state.no],x:[...state.exclude],r:[...state.require],sn:state.strictNo,d:state.difficulty,l:state.filterLoS}; const s=btoa(encodeURIComponent(JSON.stringify(obj))); location.hash=s; navigator.clipboard.writeText(location.href).then(()=>flash('Shareable link copied')); });
+$('#share')?.addEventListener('click',()=>{ const obj={y:[...state.yes],n:[...state.no],x:[...state.exclude],r:[...state.require],sn:state.strictNo,d:state.difficulty,l:state.filterLoS,sc:state.filterSpeedChange}; const s=btoa(encodeURIComponent(JSON.stringify(obj))); location.hash=s; navigator.clipboard.writeText(location.href).then(()=>flash('Shareable link copied')); });
 $('#planBtn')?.addEventListener('click',()=>{ const {kept}=filterGhosts(); const plans=generateLocalPlans(kept); renderPlans(plans); const panel=$('#planPanel'); if(panel){ panel.hidden=false; panel.scrollIntoView({behavior:'smooth',block:'start'}); } });
 
 /* LoS filter checkbox (if present) */
 $('#filterLoS')?.addEventListener('change',e=>{ state.filterLoS=e.target.checked; persist(); render(); });
+
+
+/* Speed-change filter checkbox */
+(function(){
+  const cb = document.getElementById('filterSpeedChange');
+  if(!cb) return;
+  cb.checked = !!state.filterSpeedChange;
+  cb.addEventListener('change',()=>{
+    state.filterSpeedChange = cb.checked;
+    persist();
+    render();
+  });
+})();
 
 /* Smudge controls */
 $('#smudgePreset')?.addEventListener('change',()=>{ const p=pickPreset(); if(p!=null){ smudgeDur=p; updateSmudgeUI(smudgeDur); } });

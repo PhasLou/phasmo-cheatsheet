@@ -8,13 +8,16 @@
 </head>
 <body>
 <div id="siteBanner">
-  <span id="bannerText">⚠️ Website is Work in Progress - expect bugs but they are being tracked!</span>
+  <span id="bannerText">⚠️ Known bug: Ghost speed calculated incorrectly. Working on a fix!</span>
   <button id="bannerClose">×</button>
 </div>
 
 <header>
   <div class="wrap title">
-    <h1>Phasmophobia Ghost Filter</h1>
+<h1>Phasmophobia Ghost Filter</h1>
+<div class="online-counter">
+  Online users: <span id="userCount">0</span>
+  </div>
     <div class="mode">
       <label for="difficulty">Difficulty</label>
       <select id="difficulty">
@@ -174,5 +177,54 @@
 
 <!-- Load ONLY the updated script once, at the end -->
 <script src="script.js?v=9"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // 1) Init client
+  const supabase = window.supabase.createClient(
+    'https://duxjylccikxatmubtpgy.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1eGp5bGNjaWt4YXRtdWJ0cGd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU3OTk0MzAsImV4cCI6MjA3MTM3NTQzMH0.INGyMHCM3Pv53mK9F2d2s_U79eAYLA86Y29KfaH2W4Q'
+  );
+
+  // 2) Generate a stable, anonymous id per-browser (not per tab)
+  const LS_KEY = 'phasmophobia-user-id';
+  let userId = localStorage.getItem(LS_KEY);
+  if (!userId) {
+    userId = crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2);
+    localStorage.setItem(LS_KEY, userId);
+  }
+
+  // 3) Join a realtime "presence" channel
+  //    Use a unique name for your site/app; all visitors join the same room.
+  const channel = supabase.channel('phasmophobia-online', {
+    config: { presence: { key: userId } } // presence "key" groups all tabs for one user
+  });
+
+  // 4) Update the DOM whenever presence state changes
+  function renderOnlineCount() {
+    const state = channel.presenceState(); // { userId: [metas...] }
+    // Count unique users (keys). If you want to count tabs, sum meta lengths instead.
+    const uniqueUsers = Object.keys(state).length;
+    const el = document.getElementById('userCount');
+    if (el) el.textContent = String(uniqueUsers);
+  }
+
+  channel.on('presence', { event: 'sync' }, renderOnlineCount);
+
+  // 5) Subscribe and start tracking this user’s presence
+  channel.subscribe((status) => {
+    if (status === 'SUBSCRIBED') {
+      channel.track({ online_at: new Date().toISOString() });
+    }
+  });
+
+  // (Optional) When the page becomes hidden/visible, you can re-track,
+  // but Supabase handles disconnects/reconnects automatically.
+  window.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      channel.track({ online_at: new Date().toISOString() });
+    }
+  });
+</script>
+
 </body>
 </html>

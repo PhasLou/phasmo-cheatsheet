@@ -3,7 +3,7 @@
 }
 *{box-sizing:border-box}
 body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;background:radial-gradient(1200px 1200px at 20% -10%,#122032 0%,#0c0f14 60%);color:var(--text)}
-header{position:sticky;top:0;background:#0c0f14d9;border-bottom:1px solid var(--border);backdrop-filter:blur(6px)}
+header{position:sticky;top:0;background:#0c0f14d9;border-bottom:1px solid var(--border);backdrop-filter:blur(6px);z-index:1200}
 .wrap{max-width:1200px;margin:0 auto;padding:12px 18px}
 .title{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .title h1{font-size:1.1rem;margin:0}
@@ -214,59 +214,23 @@ details.group.dragging summary { cursor: grabbing; }
   gap:16px; /* increases spacing between sections too */
 }
 
-/* Make sure the Final Check section has some margin */
-#gm-check-sec{ margin-top:16px; margin-bottom:12px; }
-#ghostModal .gm-head { flex-wrap: wrap; row-gap: 10px; }
-#ghostModal .gm-body { padding-top: 16px; }
-.ghost .solvedPrompt{
-  display:block;
-  clear:both;
-  margin:6px 0 10px;
-  background:#d4f8d4;
-  border:1px solid #6c6;
-  border-radius:4px;
-  padding:6px;
-  font-size:.85rem;
+/* === Ghost card mark-off (pure CSS) === */
+.ghost { position: relative; }
+.ghost-dismiss {
+  position: absolute; top: 8px; right: 8px;
+  width: 22px; height: 22px;
+  display: grid; place-items: center;
+  padding: 0; border: 0; border-radius: 6px;
+  background: rgba(255,255,255,0.10);
+  cursor: pointer;
+  transition: background .15s ease, transform .06s ease;
 }
-.ghost .solvedPrompt .pulse{ margin-right:6px; }
+.ghost-dismiss:hover { background: rgba(255,255,255,0.25); }
+.ghost-dismiss:active { transform: translateY(1px); }
+.ghost-dismiss svg { pointer-events: none; opacity: .9; }
+.ghost.is-dismissed { opacity: .38; filter: grayscale(.6); }
 
-}
-/* Evidence row always leaves space */
-.ghost .meta{
-  display:flex;
-  flex-wrap:wrap;
-  gap:4px;
-  margin: 6px 0 8px;         /* ensure space below evidence */
-}
-
-/* Solved banner: sits under evidence, no overlay */
-.ghost .solvedPrompt{
-  position: static;          /* not absolute */
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  margin: 6px 0 10px;
-  padding: 8px 10px;
-  border-radius: 6px;
-  border: 1px solid #29a36a;
-  background: rgba(41,163,106,0.15);  /* subtle green, not opaque */
-  color: #cfe3ff;             /* readable on dark bg */
-  box-shadow: none;
-}
-
-/* Green outline on solved card */
-.ghost.solved{
-  outline: 2px solid #29a36a;
-  outline-offset: 0;
-}
-
-/* Tiny dot animation (optional) */
-.solvedPrompt .pulse{
-  width:10px; height:10px; border-radius:50%;
-  background:#29a36a; flex:0 0 10px;
-  box-shadow:0 0 8px rgba(41,163,106,.8);
-}
-
-
-}
+/* === Safe layering: keep overlays above cards without touching the grid/cards === */
+#siteBanner { position: sticky; top: 0; z-index: 1100; }
+dialog#ghostModal { position: fixed; z-index: 5000; }
+dialog#ghostModal::backdrop { z-index: 4000; }

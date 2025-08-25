@@ -32,74 +32,511 @@ const GHOSTS=[
   {name:"Thaye",ev:["Ghost Orbs","Ghost Writing","D.O.T.S"],notes:["Starts very fast/active; ages to become slow/inactive; Ouija age changes."]},
 ];
 
+// Detailed Ghost Info (on-site)
+const GHOST_DETAILS = {
+  "Spirit": {
+    "threshold": "Normal (50%)",
+    "traits": [
+      "No unique hunt modifiers",
+      "Smudge blocks hunts ~180s (longest)"
+    ],
+    "abilities": [
+      "None distinct compared to other ghosts"
+    ],
+    "tests": [
+      "Smudge the ghost room; if hunts resume <180s, not Spirit"
+    ],
+    "strategy": [
+      "Use 3:00 smudge timer to rule out others",
+      "Collect EMF 5, Spirit Box, Writing"
+    ]
+  },
+  "Wraith": {
+    "threshold": "Normal (50%)",
+    "traits": [
+      "Never leaves UV footprints in salt",
+      "Can teleport to a player (EMF 2–5)"
+    ],
+    "abilities": [
+      "Teleport ability may cause sudden EMF far from room"
+    ],
+    "tests": [
+      "Salt + UV: no footprints after stepping = Wraith",
+      "Watch for teleport EMF spikes away from room"
+    ],
+    "strategy": [
+      "Use salt traps to confirm",
+      "Track sudden EMF away from room"
+    ]
+  },
+  "Phantom": {
+    "threshold": "Normal (50%)",
+    "traits": [
+      "Photo during event makes model disappear",
+      "Slower blink rate in hunts"
+    ],
+    "abilities": [
+      "Photo doesn’t end event; only hides model"
+    ],
+    "tests": [
+      "Photo mid-appearance: vanish = Phantom",
+      "Compare hunt blink cadence vs Oni"
+    ],
+    "strategy": [
+      "Keep a camera ready",
+      "Use blink cadence as a tell"
+    ]
+  },
+  "Poltergeist": {
+    "threshold": "Normal (50%)",
+    "traits": [
+      "Throws multiple objects at once (burst)",
+      "More frequent/stronger throws"
+    ],
+    "abilities": [
+      "Burst can drain sanity more"
+    ],
+    "tests": [
+      "Pile items; look for multi-throw bursts",
+      "Track EMF 3 on throw chains"
+    ],
+    "strategy": [
+      "Bait with object piles",
+      "Stay near objects to gather throws"
+    ]
+  },
+  "Banshee": {
+    "threshold": "Normal (50%)",
+    "traits": [
+      "Targets a single player",
+      "Unique paramic ‘scream’"
+    ],
+    "abilities": [
+      "Prefers singing events; target locked"
+    ],
+    "tests": [
+      "Listen for scream on paramic",
+      "Rotate who stays in room to test targeting"
+    ],
+    "strategy": [
+      "Swap presence to manipulate target",
+      "If not target, you’re safer during hunts"
+    ]
+  },
+  "Jinn": {
+    "threshold": "Normal (50%)",
+    "traits": [
+      "Faster when far if breaker ON",
+      "Cannot turn breaker off directly"
+    ],
+    "abilities": [
+      "Ability EMF spikes near power"
+    ],
+    "tests": [
+      "Chase with breaker ON vs OFF to see speed change"
+    ],
+    "strategy": [
+      "Kill breaker to remove speed-up",
+      "Use long hallway to observe"
+    ]
+  },
+  "Mare": {
+    "threshold": "Earlier in dark (~60%)",
+    "traits": [
+      "Prefers lights off",
+      "Less likely to turn lights on"
+    ],
+    "abilities": [
+      "Darkness early hunts"
+    ],
+    "tests": [
+      "Toggle lights; Mare turns off quickly",
+      "Keep room lit to delay hunts"
+    ],
+    "strategy": [
+      "Control lighting to manage threshold",
+      "Force switch interactions for tells"
+    ]
+  },
+  "Revenant": {
+    "threshold": "Normal (50%)",
+    "traits": [
+      "Very fast when chasing; very slow when not",
+      "Sharp speed phase change"
+    ],
+    "abilities": [
+      "Patrol slow when no LoS"
+    ],
+    "tests": [
+      "Break LoS: if speed drops sharply → Rev"
+    ],
+    "strategy": [
+      "Use corners to drop LoS",
+      "Smudge to reset pressure"
+    ]
+  },
+  "Shade": {
+    "threshold": "Normal (low activity ~35–50%)",
+    "traits": [
+      "Very shy near players",
+      "Unlikely to hunt if someone is in room"
+    ],
+    "abilities": [
+      "Prefers interactions when alone"
+    ],
+    "tests": [
+      "Low activity at low sanity → Shade",
+      "Leave room to force writing or events"
+    ],
+    "strategy": [
+      "Give it space for evidence",
+      "Expect slower confirmations"
+    ]
+  },
+  "Demon": {
+    "threshold": "Earlier (~70%)",
+    "traits": [
+      "Shorter smudge block (~120s)",
+      "Can chain early hunts"
+    ],
+    "abilities": [
+      "Very early hunt attempts"
+    ],
+    "tests": [
+      "Smudge timing: <180s but ~120s → Demon"
+    ],
+    "strategy": [
+      "Stay smudge-ready",
+      "Use pills conservatively"
+    ]
+  },
+  "Yurei": {
+    "threshold": "Normal (50%)",
+    "traits": [
+      "Strong sanity drain door slam",
+      "Less wandering when smudged in room"
+    ],
+    "abilities": [
+      "Big sanity drain event"
+    ],
+    "tests": [
+      "Watch team sanity after door slam",
+      "Smudge room; observe reduced wandering"
+    ],
+    "strategy": [
+      "Track sanity deltas",
+      "Smudge room during testing"
+    ]
+  },
+  "Oni": {
+    "threshold": "Normal (50%)",
+    "traits": [
+      "More visible; fast blink",
+      "Cannot do airball event"
+    ],
+    "abilities": [
+      "Prefers visible models"
+    ],
+    "tests": [
+      "If airball occurs → not Oni",
+      "Use blink rate to separate from Phantom"
+    ],
+    "strategy": [
+      "Push events for observation",
+      "Time blink cadence"
+    ]
+  },
+  "Yokai": {
+    "threshold": "Normal (50%) / earlier near talking",
+    "traits": [
+      "Reduced hearing while hunting",
+      "Talking near it can trigger early hunts"
+    ],
+    "abilities": [
+      "Voice proximity affects hunts"
+    ],
+    "tests": [
+      "Talk near ghost to provoke",
+      "Hide close and whisper — may not hear"
+    ],
+    "strategy": [
+      "Be careful using voice chat",
+      "Use close hides in a pinch"
+    ]
+  },
+  "Hantu": {
+    "threshold": "Normal (50%)",
+    "traits": [
+      "Faster in cold; slower in warm",
+      "Breath puffs in cold during hunt"
+    ],
+    "abilities": [
+      "Temperature-based speed"
+    ],
+    "tests": [
+      "Warm house (breaker ON) to slow it",
+      "Compare speeds in different rooms"
+    ],
+    "strategy": [
+      "Heat building to weaken",
+      "Map cold zones with thermo"
+    ]
+  },
+  "Goryo": {
+    "threshold": "Normal (50%)",
+    "traits": [
+      "DOTS on camera more than to players",
+      "Roams less from room"
+    ],
+    "abilities": [
+      "DOTS often cam-only"
+    ],
+    "tests": [
+      "Place camera; observe DOTS remotely",
+      "If only cam-DOTS → Goryo likely"
+    ],
+    "strategy": [
+      "Aim cam at ghost room",
+      "Combine with motion sensors"
+    ]
+  },
+  "Myling": {
+    "threshold": "Normal (50%)",
+    "traits": [
+      "Quieter footsteps at distance",
+      "More paramic sounds"
+    ],
+    "abilities": [
+      "Footsteps audible later than others"
+    ],
+    "tests": [
+      "Compare step audibility vs distance",
+      "Use paramic for frequent noises"
+    ],
+    "strategy": [
+      "Test at range during hunt",
+      "Balance distance to survive"
+    ]
+  },
+  "Onryo": {
+    "threshold": "Earlier with flame extinguish",
+    "traits": [
+      "Extinguished flame can trigger hunt",
+      "Fears fire (candles delay hunts)"
+    ],
+    "abilities": [
+      "Hunt roll after flame goes out"
+    ],
+    "tests": [
+      "Place candles; track extinguish → hunt",
+      "Pull candles to provoke early hunt"
+    ],
+    "strategy": [
+      "Use candles for safety",
+      "Control flame timing to identify"
+    ]
+  },
+  "The Twins": {
+    "threshold": "Normal (50%)",
+    "traits": [
+      "Two speeds: decoy faster, main slower",
+      "Interactions in two places"
+    ],
+    "abilities": [
+      "Decoy can mislead room location"
+    ],
+    "tests": [
+      "Track two interaction spots",
+      "Compare step speeds"
+    ],
+    "strategy": [
+      "Cover both spots with sensors",
+      "Use EMF timing + footsteps"
+    ]
+  },
+  "Raiju": {
+    "threshold": "Early near electronics (~65%)",
+    "traits": [
+      "Faster near active electronics",
+      "Can drain/affect nearby gear"
+    ],
+    "abilities": [
+      "Electronics radius speed buff"
+    ],
+    "tests": [
+      "Begin hunt with gear ON vs OFF",
+      "Observe speed difference"
+    ],
+    "strategy": [
+      "Power down gear during hunts",
+      "Bait with electronics to confirm"
+    ]
+  },
+  "Obake": {
+    "threshold": "Normal (50%)",
+    "traits": [
+      "Rare 6-finger UV handprint",
+      "Fingerprints fade faster"
+    ],
+    "abilities": [
+      "Odd hand shapes; faster decay"
+    ],
+    "tests": [
+      "Look for 6-finger prints",
+      "Time fingerprint lifetime"
+    ],
+    "strategy": [
+      "Photo/UV every print quickly",
+      "Re-check surfaces soon"
+    ]
+  },
+  "The Mimic": {
+    "threshold": "Varies (mimics target)",
+    "traits": [
+      "Copies behavior & speed",
+      "Always has extra Ghost Orbs"
+    ],
+    "abilities": [
+      "Can flip between archetypes"
+    ],
+    "tests": [
+      "Confirm orbs even if not expected",
+      "Watch for sudden behavior shifts"
+    ],
+    "strategy": [
+      "Keep Mimic in mind late",
+      "Don’t overfit on one behavior"
+    ]
+  },
+  "Moroi": {
+    "threshold": "Lower with curse (sanity-scaled)",
+    "traits": [
+      "Speed increases as sanity drops",
+      "Curses via Box/Paramic; pills remove curse only"
+    ],
+    "abilities": [
+      "LoS acceleration cap present"
+    ],
+    "tests": [
+      "Delay Box/Paramic early",
+      "Use pills after confirming curse"
+    ],
+    "strategy": [
+      "Manage sanity tightly",
+      "Fight in lit areas when possible"
+    ]
+  },
+  "Deogen": {
+    "threshold": "Normal (40–50%)",
+    "traits": [
+      "Fast at range, crawls up close",
+      "Always knows your location"
+    ],
+    "abilities": [
+      "Cannot be hidden from"
+    ],
+    "tests": [
+      "Do not hide — let it slow near you",
+      "Loop around furniture"
+    ],
+    "strategy": [
+      "Loop; smudge to reposition",
+      "Avoid long straight lines"
+    ]
+  },
+  "Thaye": {
+    "threshold": "Normal (rises as it ages)",
+    "traits": [
+      "Starts fast/active; weakens over time",
+      "Ages faster with players nearby"
+    ],
+    "abilities": [
+      "Behavior/evidence shift with time"
+    ],
+    "tests": [
+      "Stay near room to age faster",
+      "Compare early vs late speeds"
+    ],
+    "strategy": [
+      "Prolong near-room presence",
+      "Re-test behaviors later"
+    ]
+  }
+};
+
+
 /* Speeds */
-// ---------- Speeds (m/s) & LoS presentation ----------
+// ---------- Ghost Speeds (m/s) ----------
 const SPEEDS = {
   // Fallback reference (used only if a name is missing)
-  Standard: { base: 1.70, los: false },
+  Standard: { base: 1.70, changesSpeed: false },
 
-  // “Standard” ghosts: show only the 1.7 m/s base on the modal (no LoS line)
-  Spirit:      { base: 1.70, los: false },
-  Wraith:      { base: 1.70, los: false },
-  Phantom:     { base: 1.70, los: false },
-  Poltergeist: { base: 1.70, los: false },
-  Banshee:     { base: 1.70, los: false },
-  Mare:        { base: 1.70, los: false },
-  Shade:       { base: 1.70, los: false },
-  Yurei:       { base: 1.70, los: false },
-  Oni:         { base: 1.70, los: false },
-  Yokai:       { base: 1.70, los: false },
-  Goryo:       { base: 1.70, los: false },
-  Myling:      { base: 1.70, los: false },
-  Onryo:       { base: 1.70, los: false },
-  Obake:       { base: 1.70, los: false },
-  "The Mimic": { base: 1.70, los: false, notes: ["Can mimic other ghosts, so speed may vary."] },
+  // “Standard” ghosts (always 1.7 m/s)
+  Spirit:      { base: 1.70, changesSpeed: false },
+  Wraith:      { base: 1.70, changesSpeed: false },
+  Phantom:     { base: 1.70, changesSpeed: false },
+  Poltergeist: { base: 1.70, changesSpeed: false },
+  Banshee:     { base: 1.70, changesSpeed: false },
+  Mare:        { base: 1.70, changesSpeed: false },
+  Shade:       { base: 1.70, changesSpeed: false },
+  Yurei:       { base: 1.70, changesSpeed: false },
+  Oni:         { base: 1.70, changesSpeed: false },
+  Yokai:       { base: 1.70, changesSpeed: false },
+  Goryo:       { base: 1.70, changesSpeed: false },
+  Myling:      { base: 1.70, changesSpeed: false },
+  Onryo:       { base: 1.70, changesSpeed: false },
+  Obake:       { base: 1.70, changesSpeed: false },
+  "The Mimic": {
+    base: 1.70,
+    changesSpeed: true, // can mimic any ghost, so treat as variable
+    notes: ["Can mimic other ghosts, so speed may vary."]
+  },
 
-  // Specials (numbers/wording aligned with the cheat sheet cards)
+  // Specials
   Jinn: {
     base: 1.70,
-    los: false, // we’ll describe the LoS condition via a fixed clause instead of a generic LoS line
+    changesSpeed: true,
     fixed: [{ speed: 2.50, when: "≥3 m, breaker ON, and line of sight" }],
-    notes: ["Faster at range with power ON and LoS."]
+    notes: ["Faster at range with breaker ON and LoS."]
   },
 
   Revenant: {
     base: 1.00,
-    los: false,
+    changesSpeed: true,
     fixed: [{ speed: 3.00, when: "when it has line of sight / knows your location" }],
     notes: ["Very slow without LoS; spikes to ~3.0 m/s when it sees you."]
   },
 
   Hantu: {
     range: [1.40, 2.70],
-    los: false,
-    notes: ["Speed depends on temperature; no LoS acceleration; cannot turn breaker ON."]
+    changesSpeed: true,
+    notes: ["Speed depends on room temperature; no LoS acceleration."]
   },
 
   Raiju: {
     base: 1.70,
-    los: false,
+    changesSpeed: true,
     fixed: [{ speed: 2.50, when: "near ACTIVE electronics" }],
     notes: ["Much faster near active electronics placed by players."]
   },
 
   Moroi: {
-    range: [1.50, 2.25],   // sanity-scaled base range as shown on the card
-    los: true,              // this one explicitly shows an LoS-cap number on the card
+    range: [1.50, 2.25], // scales with cursed sanity
+    changesSpeed: true,
     losCap: 3.71,
-    notes: ["Base speed scales with (cursed) sanity; can reach ~3.71 m/s with LoS."]
+    notes: ["Base speed scales with sanity; can reach ~3.71 m/s at low sanity + LoS."]
   },
 
   Deogen: {
     range: [0.40, 3.00],
-    los: false,
-    notes: ["Very fast at range; slows to ~0.4 m/s when close. No LoS acceleration."]
+    changesSpeed: true,
+    notes: ["Very fast at range; slows to ~0.4 m/s when close. Always has LoS."]
   },
 
   Thaye: {
-    range: [1.00, 2.75],   // ages from ~2.75 down toward ~1.0
-    los: false,
-    notes: ["Starts fast; slows as it ages. No LoS acceleration."]
+    range: [1.00, 2.75], // ages from ~2.75 down toward ~1.0
+    changesSpeed: true,
+    notes: ["Starts fast; slows as it ages."]
   },
 
   "The Twins": {
@@ -107,10 +544,26 @@ const SPEEDS = {
       { label: "Main",  speed: 1.50 },
       { label: "Decoy", speed: 1.90 }
     ],
-    los: false,  // present as two fixed bases (no generic LoS line on the modal)
+    changesSpeed: true,
     notes: ["Two hunt speeds: main (~1.5) and decoy (~1.9)."]
-  },
+  }
 };
+
+/* Human-readable speed summary from SPEEDS */
+function formatSpeedSummary(name){
+  const d = (typeof SPEEDS!=='undefined' && SPEEDS && SPEEDS[name]) || (typeof SPEEDS!=='undefined' && SPEEDS && SPEEDS.Standard);
+  if (!d) return '';
+  const parts = [];
+  if (Array.isArray(d.range) && d.range.length === 2) parts.push(`Speed varies ${d.range[0]}–${d.range[1]} m/s`);
+  if (typeof d.base === 'number' && (!d.range || !d.range.length)) parts.push(`Base ~${d.base} m/s`);
+  if (Array.isArray(d.fixed) && d.fixed.length) parts.push('Fixed states: ' + d.fixed.map(f => `${f.label||'state'} ${f.speed} m/s`).join(', '));
+  if (Array.isArray(d.pair) && d.pair.length) parts.push('Variants: ' + d.pair.map(f => `${f.label||'variant'} ${f.speed} m/s`).join(', '));
+  if (typeof d.losCap === 'number') parts.push(`LoS acceleration up to ~${d.losCap} m/s`);
+  return parts.join(' • ');
+}
+
+
+
 
 
 
@@ -185,12 +638,45 @@ const SMART_TIPS=[
 ];
 
 /* ---------- State & helpers ---------- */
-const state={yes:new Set(),no:new Set(),exclude:new Set(),require:new Set(),strictNo:false,showRemoved:false,difficulty:'Professional',filterLoS:false,
-  filterSpeedChange:false};
+const state = {
+  yes: new Set(),
+  no: new Set(),
+  exclude: new Set(),
+  require: new Set(),
+  strictNo: false,
+  filterSpeedChange: false,
+  filterLoS: false,
+  showRemoved: false,
+  difficulty: 'Professional',
+  dismissed: new Set(),
+};
+
 
 const $=s=>document.querySelector(s);
 const $$=s=>Array.from(document.querySelectorAll(s));
 const $make=(t,p={})=>Object.assign(document.createElement(t),p);
+
+// Returns true if a ghost can change speed under any condition (LoS, temp, sanity, range, twin speeds, etc.)
+function ghostHasSpeedChange(name){
+  const d = SPEEDS[name];
+  if(!d) return false;
+
+  // Range (e.g., Hantu, Moroi, Deogen, Thaye) → has speed variance
+  if (Array.isArray(d.range) && d.range.length === 2 && d.range[1] > d.range[0]) return true;
+
+  // Two distinct fixed speeds (e.g., Twins)
+  if (Array.isArray(d.pair) && d.pair.length >= 2) {
+    const first = d.pair[0]?.speed;
+    if (d.pair.some(p => p.speed !== first)) return true;
+  }
+
+  // LoS-style cap or special faster state (e.g., Jinn 2.5, Revenant 3.0, Raiju 2.5)
+  if (typeof d.losCap === 'number' && typeof d.base === 'number' && d.losCap > d.base) return true;
+
+  // Otherwise: no known speed change
+  return false;
+}
+
 
 /* Toast (bright) */
 function toastWithUndo(msg,undoFn){
@@ -237,58 +723,82 @@ function ghostHasLoSAccel(name){
   return false;
 }
 
-
-
-/* Speed-change predicate */
-function ghostHasSpeedChange(name){
-    if (name === 'The Mimic') return true;
-const d = SPEEDS[name] || SPEEDS.Standard;
-  if(!d) return false;
-  // Range implies conditional speed (e.g., Hantu, Moroi, Deogen, Thaye)
-  if (Array.isArray(d.range) && d.range.length === 2 && d.range[1] > d.range[0]) return true;
-  // Two distinct fixed speeds (e.g., Twins)
-  if (Array.isArray(d.pair) && d.pair.length >= 2) {
-    const first = d.pair[0]?.speed;
-    if (d.pair.some(p => p.speed !== first)) return true;
-  }
-  // LoS-cap or fixed faster state (e.g., Jinn 2.5, Revenant 3.0, Raiju 2.5)
-  if (typeof d.losCap === 'number') return true;
-  if (Array.isArray(d.fixed) && d.fixed.some(f => typeof f.speed === 'number' && f.speed > (d.base ?? 1.7))) return true;
-  // Otherwise treat as no special speed change
-  return false;
-}
 /* Filtering */
-    if(state.filterSpeedChange && !ghostHasSpeedChange(g.name)) why.push('Filtered out: no conditional speed change');
+// Save if the box is ticked or not
+let filterSpeedChange = false;
+
+// Find the checkbox in the HTML
+const speedChangeCheckbox = document.getElementById("filterSpeedChange");
+
+// Watch for user clicking it
+speedChangeCheckbox.addEventListener("change", () => {
+  filterSpeedChange = speedChangeCheckbox.checked;
+  renderGhosts(); // refresh the ghost list
+});
+
+
+
 function filterGhosts(){
-  // Shortcut: if Speed-Change filter is ON and no other filters are active,
-  // show ALL speed-changing ghosts (ignore evidence/behavior filters).
-  const noEvidence = state.yes.size===0 && state.no.size===0;
-  const noBehaviors = state.exclude.size===0 && state.require.size===0;
-  const noStrict = !state.strictNo;
-  if (state.filterSpeedChange && noEvidence && noBehaviors && noStrict) {
-    const kept = GHOSTS.filter(g => ghostHasSpeedChange(g.name));
-    return { kept, removed: [], reasons: new Map() };
+  const reasons = new Map();
+
+  // Build "require" pool (intersection of selected require sets)
+  const reqSets = Array.from(state.require).map(id => {
+    const item = BEHAVIOURS.require.find(x => x.id === id);
+    return item && item.ghosts ? item.ghosts : [];
+  });
+  let requiredPool = null;
+  if (reqSets.length) {
+    requiredPool = new Set(reqSets[0]);
+    for (let i = 1; i < reqSets.length; i++) {
+      requiredPool = new Set([...requiredPool].filter(g => reqSets[i].includes(g)));
+    }
   }
 
-  const reasons=new Map();
-  const reqSets=Array.from(state.require).map(id=>BEHAVIOURS.require.find(x=>x.id===id)?.ghosts||[]);
-  let requiredPool=null; if(reqSets.length){ requiredPool=new Set(reqSets[0]); for(let i=1;i<reqSets.length;i++){ requiredPool=new Set([...requiredPool].filter(g=>reqSets[i].includes(g))); } }
-  const out=[],eliminated=[];
-  GHOSTS.forEach(g=>{
-    const why=[];
-    if(requiredPool && !requiredPool.has(g.name)) why.push('Does not match selected hard tell(s)');
-    const hasAllYes=Array.from(state.yes).every(ev=> g.ev.includes(ev) || (g.name==='The Mimic' && ev==='Ghost Orbs'));
-    if(!hasAllYes){ const miss=Array.from(state.yes).filter(ev=> !(g.ev.includes(ev) || (g.name==='The Mimic' && ev==='Ghost Orbs'))); if(miss.length) why.push('Missing observed evidence: '+miss.join(', ')); }
-    if(state.strictNo){ const bad=Array.from(state.no).filter(ev=> g.ev.includes(ev) && !(g.name==='The Mimic' && ev==='Ghost Orbs')); if(bad.length) why.push('Requires ruled-out evidence: '+bad.join(', ')); }
-    BEHAVIOURS.exclude.forEach(b=>{ if(state.exclude.has(b.id) && b.ghosts.includes(g.name)) why.push('Ruled out by behavior: '+b.label); });
-    if (state.filterSpeedChange) {
-      if (!ghostHasSpeedChange(g.name)) why.push('Filtered out: no conditional speed change');
-    } else if (state.filterLoS) {
-      if (!ghostHasLoSAccel(g.name)) why.push('Filtered out: no LoS speed increase');
+  const kept = [], eliminated = [];
+  for (const g of GHOSTS){
+    const why = [];
+
+    // Require behaviors
+    if (requiredPool && !requiredPool.has(g.name)) {
+      why.push('Does not match selected hard tell(s)');
     }
-    if(why.length){ reasons.set(g.name,why); eliminated.push(g); } else out.push(g);
-  });
-  return {kept:out,removed:eliminated,reasons};
+
+    // Evidence YES must be present (Mimic exception for Orbs)
+    const hasAllYes = Array.from(state.yes).every(ev =>
+      g.ev.includes(ev) || (g.name === 'The Mimic' && ev === 'Ghost Orbs')
+    );
+    if (!hasAllYes) {
+      const miss = Array.from(state.yes).filter(ev => !(g.ev.includes(ev) || (g.name === 'The Mimic' && ev === 'Ghost Orbs')));
+      if (miss.length) why.push('Missing observed evidence: ' + miss.join(', '));
+    }
+
+    // Evidence NO (only if strictNo)
+    if (state.strictNo) {
+      const bad = Array.from(state.no).filter(ev => g.ev.includes(ev) && !(g.name==='The Mimic' && ev==='Ghost Orbs'));
+      if (bad.length) why.push('Requires ruled-out evidence: ' + bad.join(', '));
+    }
+
+    // Exclude behaviours
+    for (const b of BEHAVIOURS.exclude){
+      if (state.exclude.has(b.id) && b.ghosts.includes(g.name)) {
+        why.push('Ruled out by behavior: ' + b.label);
+      }
+    }
+
+    // Speed-change filter
+    if (state.filterSpeedChange && !ghostHasSpeedChange(g.name)) {
+      why.push('Filtered out: no conditional speed change');
+    }
+
+    if (why.length) {
+      eliminated.push(g);
+      reasons.set(g.name, why);
+    } else {
+      kept.push(g);
+    }
+  }
+
+  return { kept, removed: eliminated, reasons };
 }
 
 /* Grid & cards */
@@ -340,6 +850,36 @@ function updateSmartTips(kept){
 }
 
 /* Render */
+
+// injected: polished X-button styles (light pill)
+(function ensureDismissStylesLite(){
+  if (document.getElementById('dismissStylesLite')) return;
+  const st = document.createElement('style'); st.id='dismissStylesLite';
+  st.textContent = `
+  .ghost, .ghost.clickable{ position:relative; }
+  .ghost-dismiss{
+    position:absolute; top:8px; right:8px;
+    width:22px; height:22px;
+    display:grid; place-items:center;
+    padding:0; border:0; border-radius:6px;
+    background: rgba(255,255,255,0.10);
+    cursor:pointer; transition:background .15s ease, transform .06s ease;
+  }
+  .ghost-dismiss:hover{ background: rgba(255,255,255,0.25); }
+  .ghost-dismiss:active{ transform: translateY(1px); }
+  .ghost-dismiss svg{ pointer-events:none; opacity:.9; }
+  .ghost.is-dismissed{ opacity:.38; filter:grayscale(.6); }
+  `;
+  document.head.appendChild(st);
+})();
+
+// Visual helper: ensure dimming works even if CSS doesn't match
+function applyDismissVisual(card, on){
+  if (!card) return;
+  card.classList.toggle('is-dismissed', !!on);
+  card.style.opacity = on ? '0.35' : '';
+  card.style.filter  = on ? 'grayscale(0.6)' : '';
+}
 function render(){
   const {kept,removed,reasons}=filterGhosts();
 
@@ -352,8 +892,19 @@ function render(){
     const solvedName = kept.length===1 ? kept[0].name : null;
 
     (kept.length?kept:GHOSTS).forEach(g=>{
-      const card=$make('div',{className:'ghost clickable'});
+      const card=$make('div',{className:'card ghost clickable'});
       card.addEventListener('click',()=>showGhost(g.name));
+	  
+	  
+      // mark-off button (×)
+let isOff = state.dismissed.has(g.name);
+if (isOff) card.classList.add('is-dismissed');
+const xbtn = $make('button',{className:'ghost-dismiss', title: isOff ? 'Unmark' : 'Mark off'});
+xbtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.3 5.7a1 1 0 0 0-1.4 0L12 10.6 7.1 5.7A1 1 0 0 0 5.7 7.1L10.6 12l-4.9 4.9a1 1 0 1 0 1.4 1.4L12 13.4l4.9 4.9a1 1 0 0 0 1.4-1.4L13.4 12l4.9-4.9a1 1 0 0 0 0-1.4z"></path></svg>`;
+
+      xbtn.dataset.name = g.name;
+      xbtn.addEventListener('click',(e)=>{ e.stopPropagation(); const nm=e.currentTarget.dataset.name; if(state.dismissed.has(nm)) state.dismissed.delete(nm); else state.dismissed.add(nm); try{persist&&persist();}catch{} applyDismissVisual(card, state.dismissed.has(nm)); });
+      card.appendChild(xbtn);
 
       // Build pieces in order
       const h   = $make('h4',{textContent:g.name});
@@ -473,73 +1024,144 @@ function adjustModalSpacing(){
 
 /* Modal show */
 function showGhost(name){
-  const g=GHOSTS.find(x=>x.name===name); if(!g) return;
-  const modal=$('#ghostModal'); if(!modal) return;
-  const t=$('#gm-title'), evBox=$('#gm-ev'), th=$('#gm-th'), traits=$('#gm-traits'), plan=$('#gm-plan');
-  if(t) t.textContent=g.name;
-  if(evBox){ evBox.innerHTML=''; g.ev.forEach(e=> evBox.appendChild($make('span',{className:'tag',textContent:e}))); if(g.name==='The Mimic') evBox.appendChild($make('span',{className:'tag',textContent:'+ Ghost Orbs (fake)'})); }
-  if(th){ const thArr=HUNT_TRAITS[g.name]||['Standard ~50% hunt threshold.']; th.innerHTML=thArr.map(x=>`<span class="pill-b">${x}</span>`).join(' '); }
-  if(traits){ traits.innerHTML=''; (GHOST_EXTRA[g.name]||g.notes||[]).forEach(x=>traits.appendChild($make('li',{textContent:x}))); }
-  if(plan){ plan.innerHTML=''; (GHOST_PLAN_TEMPLATES[g.name]||[]).forEach(x=>plan.appendChild($make('li',{textContent:x}))); }
-  // Speed section (create once)
-  let speedSec=$('#gm-speed-sec');
-  if(!speedSec){ speedSec=document.createElement('div'); speedSec.className='gm-sec'; speedSec.id='gm-speed-sec'; const h=$make('h4',{textContent:'Speed & LoS'}); const ul=$make('ul',{id:'gm-speed'}); ul.style.margin='0'; ul.style.paddingLeft='18px'; speedSec.append(h,ul); modal.querySelector('.gm-body')?.prepend(speedSec); }
-  const ul=$('#gm-speed'); if(ul){ ul.innerHTML=''; speedSummaryFor(g.name).forEach(line=> ul.appendChild($make('li',{textContent:line}))); }
+  const g = GHOSTS.find(x => x.name === name);
+  if (!g) return;
+  const modal = document.getElementById('ghostModal');
+  const title = document.getElementById('gm-title');
+  const evBox = document.getElementById('gm-ev');
+  const th = document.getElementById('gm-th');
+  const traits = document.getElementById('gm-traits');
+  const plan = document.getElementById('gm-plan');
 
-  /* Final Check section — place after Traits for consistent spacing */
-  const {kept}=filterGhosts(); const isSolved=kept.length===1 && kept[0].name===name;
-  let checkSec=$('#gm-check-sec');
-  if(!checkSec){ checkSec=document.createElement('div'); checkSec.id='gm-check-sec'; checkSec.className='gm-sec'; const h=$make('h4',{textContent:'Final Check'}); const box=$make('div',{className:'gm-check',id:'gm-check-box'}); checkSec.append(h,box); const body=modal.querySelector('.gm-body'); const traitsSec=$('#gm-traits')?.closest('.gm-sec'); if(traitsSec && traitsSec.parentNode){ traitsSec.parentNode.insertBefore(checkSec,traitsSec.nextSibling); } else { body?.appendChild(checkSec); } }
-  const box=$('#gm-check-box');
-  if(box){
-    if(isSolved){
-      const mode=state.difficulty; const ev=[...g.ev]; if(g.name==='The Mimic') ev.push('+ Ghost Orbs (fake)');
-      const hidden=(mode==='Nightmare'||mode==='Insanity'); const hint=hidden?'Remember: on this difficulty one or more evidences may be hidden.':'All three evidences should be obtainable.';
-      const extra=(g.name==='Goryo'?'<li>DOTS via <strong>camera</strong> (Goryo)</li>':'')+(g.name==='Wraith'?'<li>Verify: <strong>no salt footsteps/disturbance</strong></li>':'')+(g.name==='Obake'?'<li>Look for <strong>odd/6-finger prints</strong> or fast fading</li>':'');
-      box.innerHTML=`<div><div><strong>✅ Likely ${g.name}.</strong> <span class="muted">Double-check before you lock in.</span></div><ul>${ev.map(e=>`<li>Evidence: <strong>${e}</strong></li>`).join('')}${extra}</ul><div class="muted" style="margin-top:6px">${hint}</div></div>`;
-      checkSec.style.display='';
-    } else {
-      checkSec.style.display='none';
-    }
+  title.textContent = g.name;
+  evBox.innerHTML = g.ev.map(e => `<span class="ev">${e}</span>`).join('');
+
+  const d = (typeof GHOST_DETAILS!=='undefined' && GHOST_DETAILS[g.name]) || null;
+  if (d){
+    const speed = formatSpeedSummary(g.name);
+    th.innerHTML = `<div class="muted">${d.threshold}${speed? ' • '+speed : ''}</div>`;
+    const abil = (d.abilities||[]).map(t => `<li>${t}</li>`).join('');
+    const tests = (d.tests||[]).map(t => `<li>${t}</li>`).join('');
+    traits.innerHTML = d.traits.map(t => `<li>${t}</li>`).join('')
+      + (abil ? `<li><strong>Abilities:</strong><ul>${abil}</ul></li>` : '')
+      + (tests ? `<li><strong>Field tests:</strong><ul>${tests}</ul></li>` : '');
+    plan.innerHTML = (d.strategy||[]).map(s => `<li>${s}</li>`).join('');
+  } else {
+    th.innerHTML = `<div class="muted">Details coming soon</div>`;
+    traits.innerHTML = "";
+    plan.innerHTML = "";
   }
 
-  // open and fix spacing after layout
-  if(typeof modal.showModal==='function'){ modal.showModal(); } else { modal.setAttribute('open',''); }
-  requestAnimationFrame(adjustModalSpacing);
+  if (modal && typeof modal.showModal === 'function') modal.showModal();
+  else if (modal) modal.setAttribute('open','');
 }
 $('#gm-close')?.addEventListener('click',()=>{ const modal=$('#ghostModal'); if(typeof modal?.close==='function'){ modal.close(); } else { modal?.removeAttribute('open'); } });
 
 /* Persistence & UI */
-function persist(){ const obj={yes:[...state.yes],no:[...state.no],exclude:[...state.exclude],require:[...state.require],strictNo:state.strictNo,showRemoved:state.showRemoved,difficulty:state.difficulty,filterLoS:state.filterLoS,filterSpeedChange:state.filterSpeedChange};; try{ localStorage.setItem('phasmo-filter-v1',JSON.stringify(obj)); }catch{} }
-function restore(){ try{ const raw=localStorage.getItem('phasmo-filter-v1'); if(!raw) return; const o=JSON.parse(raw); state.yes=new Set(o.yes||[]); state.no=new Set(o.no||[]); state.exclude=new Set(o.exclude||[]); state.require=new Set(o.require||[]); state.strictNo=!!o.strictNo; state.showRemoved=!!o.showRemoved; state.difficulty=o.difficulty||'Professional'; state.filterLoS=!!o.filterLoS;  state.filterSpeedChange = !!o.filterSpeedChange; const difSel=$('#difficulty'); if(difSel) difSel.value=state.difficulty; const cb=$('#filterLoS'); if(cb) cb.checked=state.filterLoS; }catch{} $$('#evidence-yes .chip input').forEach((inp,i)=>{ const label=EVIDENCE[i]; inp.checked=state.yes.has(label); }); $$('#evidence-no .chip input').forEach((inp,i)=>{ const label=EVIDENCE[i]; inp.checked=state.no.has(label); }); $$('#behaviour-exclude .chip input').forEach((inp,i)=>{ const id=BEHAVIOURS.exclude[i].id; inp.checked=state.exclude.has(id); }); $$('#behaviour-require .chip input').forEach((inp,i)=>{ const id=BEHAVIOURS.require[i].id; inp.checked=state.require.has(id); }); const strict=$('#strictNo'); if(strict) strict.checked=state.strictNo; }
-function restoreFromHash(){ if(!location.hash) return false; try{ const o=JSON.parse(decodeURIComponent(atob(location.hash.slice(1)))); state.yes=new Set(o.y||[]); state.no=new Set(o.n||[]); state.exclude=new Set(o.x||[]); state.require=new Set(o.r||[]); state.strictNo=!!o.sn; state.difficulty=o.d||'Professional'; state.filterLoS=!!o.l; state.filterSpeedChange = !!o.sc; const difSel=$('#difficulty'); if(difSel) difSel.value=state.difficulty; const cb=$('#filterLoS'); if(cb) cb.checked=state.filterLoS; return true; }catch{return false;} }
+function persist(){
+  const obj = {
+    yes:[...state.yes], no:[...state.no],
+    exclude:[...state.exclude], require:[...state.require],
+    strictNo:state.strictNo, showRemoved:state.showRemoved,
+    difficulty:state.difficulty,
+      dismissed:[...state.dismissed],
+    dismissed:[...state.dismissed],
+    filterSpeedChange: state.filterSpeedChange,  // NEW
+    compact: !!document.getElementById('compactToggle')?.checked,
+    collapse: !!document.getElementById('collapseAll')?.checked
+  };
+  localStorage.setItem('phasmo-filter-v1', JSON.stringify(obj));
+}
+function restore(){
+  try{
+    const raw = localStorage.getItem('phasmo-filter-v1'); if(!raw) return;
+    const o = JSON.parse(raw);
+    state.yes = new Set(o.yes||[]);
+    state.no = new Set(o.no||[]);
+    state.exclude = new Set(o.exclude||[]);
+    state.require = new Set(o.require||[]);
+    state.strictNo = !!o.strictNo;
+    state.showRemoved = !!o.showRemoved;
+    state.difficulty = o.difficulty || 'Professional';
+    state.dismissed = new Set(o.dismissed || []);
+
+    // Migrate old flag if present
+    state.filterSpeedChange = ('filterSpeedChange' in o)
+      ? !!o.filterSpeedChange
+      : !!o.filterLoS;
+
+    $('#difficulty').value = state.difficulty;
+    const cb = document.getElementById('filterSpeedChange');
+    if (cb) cb.checked = state.filterSpeedChange;
+    try{
+      const cpt = document.getElementById('compactToggle');
+      const col = document.getElementById('collapseAll');
+      if (cpt) { cpt.checked = !!o.compact; document.body.classList.toggle('compact', !!o.compact); }
+      if (col) { col.checked = !!o.collapse; document.querySelectorAll('#filtersRoot details.group').forEach(d=> d.open = !o.collapse); }
+    }catch{}
+
+  }catch{}
+  // hydrate chips (unchanged) ...
+}
+
+function restoreFromHash(){
+  if(!location.hash) return false;
+  try{
+    const o = JSON.parse(decodeURIComponent(atob(location.hash.slice(1))));
+    state.yes = new Set(o.y||[]);
+    state.no = new Set(o.n||[]);
+    state.exclude = new Set(o.x||[]);
+    state.require = new Set(o.r||[]);
+    state.strictNo = !!o.sn;
+    state.showRemoved = !!o.sr;
+    state.difficulty = o.d || 'Professional';
+
+    // New key `sc`; fall back to old `l`
+    state.filterSpeedChange = ('sc' in o) ? !!o.sc : !!o.l;
+
+    $('#difficulty').value = state.difficulty;
+    const cb = document.getElementById('filterSpeedChange');
+    if (cb) cb.checked = state.filterSpeedChange;
+    try{
+      const cpt = document.getElementById('compactToggle');
+      const col = document.getElementById('collapseAll');
+      if (cpt) { cpt.checked = !!o.compact; document.body.classList.toggle('compact', !!o.compact); }
+      if (col) { col.checked = !!o.collapse; document.querySelectorAll('#filtersRoot details.group').forEach(d=> d.open = !o.collapse); }
+    }catch{}
+
+    return true;
+  }catch{
+    return false;
+  }
+}
+
+
 
 /* Events */
 $('#difficulty')?.addEventListener('change',e=>{ state.difficulty=e.target.value; const cfg=DIFFICULTY[state.difficulty]; const strict=$('#strictNo'); if(strict){ strict.checked=state.strictNo=cfg.strictNoDefault; } persist(); render(); });
-$('#compactToggle')?.addEventListener('change',e=>{ document.body.classList.toggle('compact',e.target.checked); });
-$('#collapseAll')?.addEventListener('change',e=>{ $$('#filtersRoot details.group').forEach(d=> d.open=!e.target.checked ); });
+$('#compactToggle')?.addEventListener('change',e=>{ document.body.classList.toggle('compact',e.target.checked); persist(); });
+$('#collapseAll')?.addEventListener('change',e=>{ $$('#filtersRoot details.group').forEach(d=> d.open=!e.target.checked ); persist(); });
 $('#strictNo')?.addEventListener('change',e=>{ state.strictNo=e.target.checked; persist(); render(); });
 $('#showRemoved')?.addEventListener('change',e=>{ state.showRemoved=e.target.checked; persist(); render(); });
 $('#reset')?.addEventListener('click',()=>{ state.yes.clear(); state.no.clear(); state.exclude.clear(); state.require.clear(); const cfg=DIFFICULTY[state.difficulty]; state.strictNo=cfg.strictNoDefault; const strict=$('#strictNo'); if(strict) strict.checked=state.strictNo; $$('#filtersRoot .chip input').forEach(i=>i.checked=false); persist(); render(); });
 $('#copy')?.addEventListener('click',()=>{ const {kept}=filterGhosts(); const txt=kept.map(g=>g.name).join(', '); navigator.clipboard.writeText(txt).then(()=>flash('Copied remaining ghosts')); });
-$('#share')?.addEventListener('click',()=>{ const obj={y:[...state.yes],n:[...state.no],x:[...state.exclude],r:[...state.require],sn:state.strictNo,d:state.difficulty,l:state.filterLoS,sc:state.filterSpeedChange}; const s=btoa(encodeURIComponent(JSON.stringify(obj))); location.hash=s; navigator.clipboard.writeText(location.href).then(()=>flash('Shareable link copied')); });
+$('#share').addEventListener('click',()=>{
+  const obj = {
+    y:[...state.yes], n:[...state.no], x:[...state.exclude], r:[...state.require],
+    sn:state.strictNo, sr:state.showRemoved,
+    d:state.difficulty, sc:state.filterSpeedChange,
+    ct: !!document.getElementById('compactToggle')?.checked,
+    ca: !!document.getElementById('collapseAll')?.checked
+  };
+  const s = btoa(encodeURIComponent(JSON.stringify(obj)));
+  location.hash = s;
+  navigator.clipboard.writeText(location.href).then(()=>flash('Shareable link copied'));
+});
+
 $('#planBtn')?.addEventListener('click',()=>{ const {kept}=filterGhosts(); const plans=generateLocalPlans(kept); renderPlans(plans); const panel=$('#planPanel'); if(panel){ panel.hidden=false; panel.scrollIntoView({behavior:'smooth',block:'start'}); } });
 
-/* LoS filter checkbox (if present) */
-$('#filterLoS')?.addEventListener('change',e=>{ state.filterLoS=e.target.checked; persist(); render(); });
-
-
 /* Speed-change filter checkbox */
-(function(){
-  const cb = document.getElementById('filterSpeedChange');
-  if(!cb) return;
-  cb.checked = !!state.filterSpeedChange;
-  cb.addEventListener('change',()=>{
-    state.filterSpeedChange = cb.checked;
-    persist();
-    render();
-  });
-})();
+$('#filterSpeedChange')?.addEventListener('change',e=>{ state.filterSpeedChange=e.target.checked; persist(); render(); });
 
 /* Smudge controls */
 $('#smudgePreset')?.addEventListener('change',()=>{ const p=pickPreset(); if(p!=null){ smudgeDur=p; updateSmudgeUI(smudgeDur); } });
@@ -566,3 +1188,379 @@ const loadedFromHash=restoreFromHash(); if(!loadedFromHash){ restore(); }
 if(!localStorage.getItem('phasmo-filter-v1') && !loadedFromHash){ const cfg=DIFFICULTY[state.difficulty]; state.strictNo=cfg.strictNoDefault; }
 const strict=$('#strictNo'); if(strict) strict.checked=state.strictNo;
 render();
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Delegated handler for ghost-dismiss so it survives re-renders
+  const __grid = document.getElementById('grid');
+  if (__grid && !__grid.__dismissBound){
+    __grid.addEventListener('click', (e) => {
+      const btn = e.target.closest('.ghost-dismiss');
+      if (!btn) return;
+      e.stopPropagation();
+      const name = btn.dataset.name || btn.getAttribute('data-name');
+      if (!name || !window.state || !state.dismissed) return;
+      if (state.dismissed.has(name)) state.dismissed.delete(name);
+      else state.dismissed.add(name);
+      try { persist && persist(); } catch {}
+      try { render && render(); } catch {}
+    }, true);
+    __grid.__dismissBound = true;
+  }
+
+});
+
+
+// Ensure every ghost card has a dismiss button after render
+(function ensureDismissButtonsSetup(){
+  function addButtons(){
+    const cards = document.querySelectorAll('.ghost');
+    cards.forEach(card => {
+      if (card.querySelector('.ghost-dismiss')) return;
+      const name = card.getAttribute('data-name') || (card.querySelector('.head h4')?.textContent || '').trim();
+      if (!name) return;
+      const btn = document.createElement('button');
+      btn.className = 'ghost-dismiss';
+      btn.dataset.name = name;
+      const marked = (window.state && state.dismissed && state.dismissed.has(name));
+      btn.setAttribute('aria-label', marked ? 'Unmark' : 'Mark off');
+      btn.setAttribute('title', marked ? 'Unmark' : 'Mark off');
+      btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.3 5.7a1 1 0 0 0-1.4 0L12 10.6 7.1 5.7A1 1 0 0 0 5.7 7.1L10.6 12l-4.9 4.9a1 1 0 1 0 1.4 1.4L12 13.4l4.9 4.9a1 1 0 0 0 1.4-1.4L13.4 12l4.9-4.9a1 1 0 0 0 0-1.4z"></path></svg>';
+      card.prepend(btn);
+      if (marked) card.classList.add('is-dismissed');
+    });
+  }
+
+  if (typeof window.render === 'function' && !window.__renderWrappedForDismiss){
+    const __orig = window.render;
+    window.render = function(){
+      const out = __orig.apply(this, arguments);
+      try { requestAnimationFrame(addButtons); } catch { addButtons(); }
+      return out;
+    };
+    window.__renderWrappedForDismiss = true;
+    try { addButtons(); } catch {}
+  }
+
+  const grid = document.getElementById('grid');
+  if (grid && !grid.__dismissObserver){
+    const mo = new MutationObserver(() => { addButtons(); });
+    mo.observe(grid, { childList: true, subtree: true });
+    grid.__dismissObserver = mo;
+  }
+})();
+
+
+
+/* ======================================================
+   Patch: Robust "mark off (X)" toggle that always works
+   - Adds a top-right X button to every ghost card (.ghost)
+   - Clicking toggles a persistent .is-dismissed class
+   - Works across renders/filters without touching your logic
+   ====================================================== */
+(function(){
+  if (window.__dismissPatched) return;
+  window.__dismissPatched = true;
+
+  // 1) Ensure state and state.dismissed exist
+  try { window.state = window.state || {}; } catch(e){ window.state = {}; }
+  if (!(state.dismissed instanceof Set)) state.dismissed = new Set(Array.isArray(state.dismissed) ? state.dismissed : []);
+
+  // 2) Style injector (safe to run multiple times)
+  function ensureDismissStylesLite(){
+    if (document.getElementById('dismissStylesLite')) return;
+    const st = document.createElement('style'); st.id='dismissStylesLite';
+    st.textContent = `
+      .ghost, .ghost.clickable{ position:relative; }
+      .ghost-dismiss{
+        position:absolute; top:8px; right:8px;
+        width:22px; height:22px;
+        display:grid; place-items:center;
+        padding:0; border:0; border-radius:6px;
+        background: rgba(255,255,255,0.10);
+        cursor:pointer; transition:background .15s ease, transform .06s ease;
+      }
+      .ghost-dismiss:hover{ background: rgba(255,255,255,0.25); }
+      .ghost-dismiss:active{ transform: translateY(1px); }
+      .ghost-dismiss svg{ pointer-events:none; opacity:.9; }
+      .ghost.is-dismissed{ opacity:.38; filter:grayscale(.6); }
+    `;
+    document.head.appendChild(st);
+  }
+
+  const X_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.3 5.7a1 1 0 0 0-1.4 0L12 10.6 7.1 5.7A1 1 0 0 0 5.7 7.1L10.6 12l-4.9 4.9a1 1 0 1 0 1.4 1.4L12 13.4l4.9 4.9a1 1 0 0 0 1.4-1.4L13.4 12l4.9-4.9a1 1 0 0 0 0-1.4z"></path></svg>';
+
+  // 3) Persistence helpers (augment existing persist/restore if present)
+  const _persist  = typeof window.persist  === 'function' ? window.persist  : null;
+  const _restore  = typeof window.restore  === 'function' ? window.restore  : null;
+  const STORAGE_KEY = 'phasmo-filter-v1';
+
+  function saveDismissed(){
+    try{
+      // Call original persist (so you don't lose other fields)
+      if (_persist) _persist();
+      // Merge dismissed into the same object
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const o = raw ? JSON.parse(raw) : {};
+      o.dismissed = Array.from(state.dismissed);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(o));
+    }catch(e){ /* no-op */ }
+  }
+
+  function loadDismissed(){
+    try{
+      if (_restore) _restore(); // let original restore its stuff first
+    }catch(e){ /* ignore */ }
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const o = JSON.parse(raw);
+      if (o && Array.isArray(o.dismissed)) state.dismissed = new Set(o.dismissed);
+    }catch(e){ /* ignore */ }
+  }
+
+  // 4) Toggle + apply
+  function applyDismiss(card, on){
+    if (!card) return;
+    card.classList.toggle('is-dismissed', !!on);
+  }
+
+  function toggleByName(name, card){
+    if (!name) return;
+    if (state.dismissed.has(name)) state.dismissed.delete(name);
+    else state.dismissed.add(name);
+    applyDismiss(card, state.dismissed.has(name));
+    saveDismissed();
+  }
+
+  // 5) Ensure every card has a button, and classes match state
+  function ensureButtons(){
+    ensureDismissStylesLite();
+    const grid = document.getElementById('grid');
+    if (!grid) return;
+
+    const cards = grid.querySelectorAll('.ghost');
+    cards.forEach(card => {
+      const name = (card.querySelector('h4')?.textContent || '').trim();
+      if (!name) return;
+
+      // Add / update button
+      let btn = card.querySelector('.ghost-dismiss');
+      if (!btn){
+        btn = document.createElement('button');
+        btn.className = 'ghost-dismiss';
+        btn.title = state.dismissed.has(name) ? 'Unmark' : 'Mark off';
+        btn.innerHTML = X_SVG;
+        btn.dataset.name = name;
+        btn.addEventListener('click', (e)=>{ e.stopPropagation(); toggleByName(name, card); });
+        card.appendChild(btn);
+      }else{
+        btn.dataset.name = name;
+      }
+
+      // Apply current state
+      applyDismiss(card, state.dismissed.has(name));
+    });
+  }
+
+  // 6) Patch render() to run our ensureButtons() after every render
+  const _render = typeof window.render === 'function' ? window.render : null;
+  if (_render){
+    window.render = function(){
+      const out = _render.apply(this, arguments);
+      try { ensureButtons(); } catch(e){}
+      return out;
+    };
+  } else {
+    // If render is not ready yet, run once after DOMContentLoaded and then periodically
+    document.addEventListener('DOMContentLoaded', ensureButtons);
+    const iv = setInterval(() => {
+      try{ ensureButtons(); if (document.getElementById('grid')?.children?.length) clearInterval(iv); }catch{}
+    }, 250);
+  }
+
+  // 7) Setup a single delegated handler just in case
+  document.addEventListener('click', function(e){
+    const btn = e.target.closest?.('.ghost-dismiss');
+    if (!btn) return;
+    e.stopPropagation();
+    const grid = document.getElementById('grid');
+    const card = btn.closest('.ghost');
+    const name = btn.dataset.name || (card?.querySelector('h4')?.textContent || '').trim();
+    toggleByName(name, card);
+  }, true);
+
+  // 8) Restore on load
+  try { loadDismissed(); } catch(e){}
+})();
+
+
+// --- Top banner close (no persistence) ---
+document.addEventListener('DOMContentLoaded', () => {
+  const banner = document.getElementById('siteBanner');
+  const btn = document.getElementById('bannerClose');
+  if (btn && banner && !btn.__bound) {
+    btn.addEventListener('click', () => {
+      banner.style.display = 'none';
+    });
+    btn.__bound = true;
+  }
+});
+
+
+
+/* ======================================================
+   Patch 2: Share + Restore checkbox states, and default groups
+   - Ensures share links carry: ct (compact), ca (collapse all),
+     sr (show removed), sc (speed change), sn (strict no), d (difficulty)
+   - Applies those states on restoreFromHash
+   - At startup, only opens the "Observed Evidence" group
+   ====================================================== */
+(function(){
+  // Helper: read current checkbox states safely
+  function _readCheckboxes(){
+    const el = (id)=> document.getElementById(id);
+    return {
+      ct: !!el('compactToggle')?.checked,
+      ca: !!el('collapseAll')?.checked,
+      sr: !!el('showRemoved')?.checked,
+      sc: !!el('filterSpeedChange')?.checked,
+      sn: !!el('strictNo')?.checked,
+      d:  (document.getElementById('difficulty')?.value || (window.state?.difficulty) || 'Professional')
+    };
+  }
+
+  // Helper: apply checkbox states to UI
+  function _applyCheckboxes(o){
+    try{
+      const setChk = (id, val, cb)=>{
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.checked = !!val;
+        if (typeof cb === 'function') cb(!!val);
+      };
+      setChk('compactToggle', o.ct, (v)=> document.body.classList.toggle('compact', v));
+      setChk('collapseAll', o.ca, (v)=> {
+        document.querySelectorAll('#filtersRoot details.group').forEach(d => d.open = !v);
+      });
+      setChk('showRemoved', o.sr, (v)=>{
+        if (window.state) state.showRemoved = !!v;
+      });
+      setChk('filterSpeedChange', o.sc, (v)=>{
+        if (window.state) state.filterSpeedChange = !!v;
+      });
+      setChk('strictNo', o.sn, (v)=>{
+        if (window.state) state.strictNo = !!v;
+      });
+      const dif = document.getElementById('difficulty');
+      if (dif && o.d) dif.value = o.d;
+      if (window.state && o.d) state.difficulty = o.d;
+      if (typeof window.persist === 'function') try{ persist(); }catch{}
+      if (typeof window.render === 'function') try{ render(); }catch{}
+    }catch{}
+  }
+
+  function _parseHash(){
+    try{
+      const h = location.hash?.slice(1);
+      if (!h) return null;
+      let obj = null;
+      // Try base64 JSON
+      try{ obj = JSON.parse(atob(decodeURIComponent(h))); }catch{}
+      // Try plain JSON
+      if (!obj) try{ obj = JSON.parse(decodeURIComponent(h)); }catch{}
+      return obj || null;
+    }catch{ return null; }
+  }
+
+  // Patch share button to include checkbox flags
+  function _patchShare(){
+    const btn = document.getElementById('share');
+    if (!btn || btn.__sharePatched2) return;
+    btn.addEventListener('click', (e)=>{
+      e.preventDefault();
+      // Build object from existing state if possible
+      const base = {
+        y: Array.from(window.state?.yes || []),
+        n: Array.from(window.state?.no || []),
+        x: Array.from(window.state?.exclude || []),
+        r: Array.from(window.state?.require || []),
+        d: (window.state?.difficulty) || document.getElementById('difficulty')?.value || 'Professional',
+        sn: !!(window.state?.strictNo),
+        sr: !!(window.state?.showRemoved),
+        sc: !!(window.state?.filterSpeedChange)
+      };
+      const c = _readCheckboxes();
+      base.ct = !!c.ct;
+      base.ca = !!c.ca;
+      base.sr = !!c.sr; // ensure sync with UI
+      base.sc = !!c.sc;
+      base.sn = !!c.sn;
+      base.d  = c.d || base.d;
+
+      const hash = encodeURIComponent(btoa(JSON.stringify(base)));
+      const url = location.origin + location.pathname + '#' + hash;
+      try{
+        navigator.clipboard.writeText(url);
+        btn.textContent = 'Link copied!';
+        setTimeout(()=>{ btn.textContent = 'Share'; }, 1500);
+      }catch{
+        // Fallback: update address bar
+        location.hash = hash;
+      }
+    });
+    btn.__sharePatched2 = true;
+  }
+
+  // Patch restoreFromHash to also apply checkbox flags
+  (function patchRestore(){
+    const _orig = window.restoreFromHash;
+    window.restoreFromHash = function(){
+      let ok = false;
+      if (typeof _orig === 'function'){
+        try { ok = !!_orig.apply(this, arguments); } catch { ok = false; }
+      }
+      // Regardless of return, try to apply our flags if present
+      const o = _parseHash();
+      if (o){
+        const flags = {
+          ct: !!o.ct, ca: !!o.ca, sr: !!o.sr, sc: !!o.sc, sn: !!o.sn, d: o.d
+        };
+        _applyCheckboxes(flags);
+        ok = true;
+      }
+      return ok;
+    };
+  })();
+
+  // Open only "Observed Evidence" group on first load (if no hash dictates otherwise)
+  document.addEventListener('DOMContentLoaded', ()=>{
+    try{
+      const o = _parseHash();
+      // Only force open state if hash is absent or doesn't include collapse flag
+      const force = !(o && ('ca' in o));
+      const groups = document.querySelectorAll('#filtersRoot details.group');
+      if (groups && groups.length){
+        groups.forEach(d => d.open = false);
+        // Find group whose text mentions "Observed Evidence"
+        let target = null;
+        groups.forEach(d => {
+          const txt = (d.querySelector('summary, h3, .groupTitle')?.textContent || '').toLowerCase();
+          if (txt.includes('observed evidence')) target = d;
+        });
+        if (!target) target = groups[0]; // fallback
+        if (force && target) target.open = true;
+      }
+    }catch{}
+    _patchShare();
+  });
+
+  // Also run when the UI rebuilds
+  const _render = window.render;
+  if (typeof _render === 'function'){
+    window.render = function(){
+      const out = _render.apply(this, arguments);
+      try { _patchShare(); } catch {}
+      return out;
+    };
+  }
+})();

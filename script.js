@@ -1,3 +1,45 @@
+function buildCardLines(name){
+  // Build easy-to-read bullet points for the card (no field tests here)
+  try{
+    const g = Array.isArray(GHOSTS) ? GHOSTS.find(x => x.name === name) : null;
+    const d = (typeof GHOST_DETAILS!=='undefined' && GHOST_DETAILS && GHOST_DETAILS[name]) || null;
+    let lines = [];
+
+    if (d && Array.isArray(d.traits) && d.traits.length){
+      lines = d.traits.slice(0, 3); // show up to 3 short traits
+    } else if (g && Array.isArray(g.notes) && g.notes.length){
+      lines = g.notes.slice(0, 3);
+    }
+
+    // Light simplifications for clarity
+    const simplify = (t) => {
+      if (!t || typeof t !== 'string') return '';
+      let s = t.trim();
+
+      // Expand common shorthand
+      s = s.replace(/\bLoS\b/gi, 'if it sees you');
+      s = s.replace(/\bD\.?O\.?T\.?S\b/gi, 'D.O.T.S');
+      s = s.replace(/\bpara\b/gi, 'parabolic');
+      s = s.replace(/\bpara(?:bolic)?\s*mic\b/gi, 'parabolic microphone');
+      s = s.replace(/\bUV\b/gi, 'UV');
+      s = s.replace(/\bEMF\b/gi, 'EMF');
+      s = s.replace(/\bw\//gi, 'with ');
+      s = s.replace(/\bw\/o\b/gi, 'without ');
+
+      // Friendlier phrasing
+      s = s.replace(/accelerat(e|es|ion)/gi, 'speed up');
+      s = s.replace(/threshold/gi, 'limit');
+      s = s.replace(/sanity/gi, 'team sanity');
+
+      // Make it read like a sentence
+      if (!/[.!?]$/.test(s)) s += '.';
+      return s;
+    };
+
+    return lines.map(simplify);
+  }catch(e){ return []; }
+}
+
 /* =========================
    Phasmophobia — script.js
    ========================= */
@@ -6,30 +48,30 @@
 const EVIDENCE=["EMF Level 5","Spirit Box","Ghost Writing","Freezing Temps","D.O.T.S","Ghost Orbs","Fingerprints (UV)"];
 
 const GHOSTS=[
-  {name:"Spirit",ev:["EMF Level 5","Spirit Box","Ghost Writing"],notes:["Smudge prevents hunts ~3 mins (longest)."]},
-  {name:"Wraith",ev:["EMF Level 5","Spirit Box","D.O.T.S"],notes:["Will never step in or disturb salt; no UV footprints.","Can teleport to players (EMF 2, sometimes 5)."]},
-  {name:"Phantom",ev:["Spirit Box","Fingerprints (UV)","D.O.T.S"],notes:["Photo makes ghost model disappear.","Slow blink during hunts."]},
-  {name:"Poltergeist",ev:["Spirit Box","Fingerprints (UV)","Ghost Writing"],notes:["Can throw multiple objects at once (polter burst)."]},
-  {name:"Banshee",ev:["Fingerprints (UV)","Ghost Orbs","D.O.T.S"],notes:["Targets one player.","Unique parabolic scream."]},
-  {name:"Jinn",ev:["EMF Level 5","Fingerprints (UV)","Freezing Temps"],notes:["Will not turn the fuse box OFF directly (can overload).","Faster with line of sight when far while power ON."]},
-  {name:"Mare",ev:["Spirit Box","Ghost Orbs","Ghost Writing"],notes:["Prefers darkness; higher hunt chance with lights off.","Will not turn lights ON."]},
-  {name:"Revenant",ev:["Ghost Orbs","Ghost Writing","Freezing Temps"],notes:["Very slow with no LoS; extremely fast when it sees you."]},
-  {name:"Shade",ev:["EMF Level 5","Ghost Writing","Freezing Temps"],notes:["Shy: fewer events with people nearby; reluctant to hunt with players in room."]},
-  {name:"Demon",ev:["Fingerprints (UV)","Ghost Writing","Freezing Temps"],notes:["Can hunt very early; shorter smudge cooldown."]},
-  {name:"Yurei",ev:["Ghost Orbs","D.O.T.S","Freezing Temps"],notes:["Stronger sanity drain door event; smudging room can lock it briefly."]},
-  {name:"Oni",ev:["EMF Level 5","D.O.T.S","Freezing Temps"],notes:["No airball events.","More visible during events."]},
-  {name:"Yokai",ev:["Spirit Box","Ghost Orbs","D.O.T.S"],notes:["Talking can trigger hunts; reduced hearing during hunts."]},
-  {name:"Hantu",ev:["Fingerprints (UV)","Ghost Orbs","Freezing Temps"],notes:["Faster in cold; frosty breath during hunts in cold/with breaker off.","Cannot turn fuse box ON."]},
-  {name:"Goryo",ev:["EMF Level 5","Fingerprints (UV)","D.O.T.S"],notes:["DOTS only on camera; rarely far from room."]},
-  {name:"Myling",ev:["EMF Level 5","Fingerprints (UV)","Ghost Writing"],notes:["Very quiet footsteps during hunt; active on parabolic."]},
-  {name:"Onryo",ev:["Spirit Box","Ghost Orbs","Freezing Temps"],notes:["Candle/flame blow-out can trigger hunts."]},
-  {name:"The Twins",ev:["EMF Level 5","Spirit Box","Freezing Temps"],notes:["Two spots interacting; different hunt speeds."]},
-  {name:"Raiju",ev:["EMF Level 5","Ghost Orbs","D.O.T.S"],notes:["Faster near active electronics; lower hunt threshold around electronics."]},
-  {name:"Obake",ev:["EMF Level 5","Ghost Orbs","Fingerprints (UV)"],notes:["6-finger/odd prints; prints fade quickly; sometimes no prints."]},
-  {name:"The Mimic",ev:["Spirit Box","Freezing Temps","Fingerprints (UV)"],notes:["ALWAYS shows Ghost Orbs as extra evidence.","Can imitate other ghosts' behaviors."]},
-  {name:"Moroi",ev:["Spirit Box","Ghost Writing","Freezing Temps"],notes:["Box/parabolic can curse you → faster sanity drain; longer smudge blind once hunting."]},
-  {name:"Deogen",ev:["Spirit Box","Ghost Writing","D.O.T.S"],notes:["Heavy breathing SB; very slow when near you; fast at range."]},
-  {name:"Thaye",ev:["Ghost Orbs","Ghost Writing","D.O.T.S"],notes:["Starts very fast/active; ages to become slow/inactive; Ouija age changes."]},
+  {name:"Spirit",ev:["EMF Level 5", "Spirit Box", "Ghost Writing"],notes:["Smudge stops hunts for ~180s (longest).", "Otherwise very standard behavior."]},
+  {name:"Wraith",ev:["EMF Level 5", "Spirit Box", "D.O.T.S"],notes:["Does not interact with salt.", "Can teleport to players (random EMF away from room)."]},
+  {name:"Phantom",ev:["Spirit Box", "Fingerprints (UV)", "D.O.T.S"],notes:["Photo makes the ghost disappear.", "Longer invisibility during hunts (slow blinks)."]},
+  {name:"Poltergeist",ev:["Spirit Box", "Fingerprints (UV)", "Ghost Writing"],notes:["Multi-throws in bursts; big sanity drain per throw.", "Pile items to bait a throw storm."]},
+  {name:"Banshee",ev:["Fingerprints (UV)", "Ghost Orbs", "D.O.T.S"],notes:["Hunts based on a single target\u2019s sanity.", "Unique parabolic \u2018scream\u2019 sound."]},
+  {name:"Jinn",ev:["EMF Level 5", "Fingerprints (UV)", "Freezing Temps"],notes:["Faster at range with breaker ON + line of sight.", "25% sanity \u2018zap\u2019 at breaker; can\u2019t turn breaker off directly."]},
+  {name:"Mare",ev:["Spirit Box", "Ghost Orbs", "Ghost Writing"],notes:["Prefers darkness; turns lights OFF.", "Won\u2019t turn lights ON; earlier hunts in dark."]},
+  {name:"Revenant",ev:["Ghost Orbs", "Ghost Writing", "Freezing Temps"],notes:["Very slow with no line of sight.", "Very fast once it sees a player."]},
+  {name:"Shade",ev:["EMF Level 5", "Ghost Writing", "Freezing Temps"],notes:["Very shy; low activity near players.", "Least likely to hunt with people in its room."]},
+  {name:"Demon",ev:["Fingerprints (UV)", "Ghost Writing", "Freezing Temps"],notes:["Earliest hunter; aggressive chains.", "Shortest smudge block (~60s) and cooldown."]},
+  {name:"Yurei",ev:["Ghost Orbs", "Freezing Temps", "D.O.T.S"],notes:["Door slam drains nearby sanity.", "Smudging room \u2018seals\u2019 it briefly (reduced roaming)."]},
+  {name:"Oni",ev:["EMF Level 5", "Freezing Temps", "D.O.T.S"],notes:["Very active and more visible.", "No airball ghost event; stronger event sanity drain."]},
+  {name:"Yokai",ev:["Spirit Box", "Ghost Orbs", "D.O.T.S"],notes:["Talking near it can provoke hunts.", "During hunts it hears voices only very close."]},
+  {name:"Hantu",ev:["Freezing Temps", "Ghost Orbs", "Fingerprints (UV)"],notes:["Faster in cold, slower in warm.", "Visible cold breath when power is off."]},
+  {name:"Goryo",ev:["EMF Level 5", "Fingerprints (UV)", "D.O.T.S"],notes:["DOTS usually camera-only.", "Rarely shows DOTS with people in the room."]},
+  {name:"Myling",ev:["EMF Level 5", "Ghost Writing", "Fingerprints (UV)"],notes:["Quieter footsteps at range in hunts.", "More frequent parabolic mic sounds."]},
+  {name:"Onryo",ev:["Spirit Box", "Ghost Orbs", "Freezing Temps"],notes:["Candle/flame logic controls hunts.", "Every 3rd nearby blowout can trigger a hunt."]},
+  {name:"The Twins",ev:["EMF Level 5", "Spirit Box", "Freezing Temps"],notes:["Two behaviors: slow and fast twin.", "Desynced interactions in separate spots."]},
+  {name:"Raiju",ev:["EMF Level 5", "Ghost Orbs", "D.O.T.S"],notes:["Faster near active electronics.", "Wider electronic interference range."]},
+  {name:"Obake",ev:["EMF Level 5", "Ghost Orbs", "Fingerprints (UV)"],notes:["Unique/6\u2011finger prints; fade faster.", "Sometimes leaves no prints after interactions."]},
+  {name:"The Mimic",ev:["Spirit Box", "Freezing Temps", "Fingerprints (UV)"],notes:["Always shows extra Ghost Orbs.", "Mimics behavior/thresholds of other ghosts."]},
+  {name:"Moroi",ev:["Spirit Box", "Ghost Writing", "Freezing Temps"],notes:["Curses via Box/para \u2192 faster sanity drain.", "Gets faster as team sanity drops; smudge blinds longer."]},
+  {name:"Deogen",ev:["Spirit Box", "Ghost Writing", "D.O.T.S"],notes:["Always knows your location.", "Very fast when far, crawls when near (loopable)."]},
+  {name:"Thaye",ev:["Ghost Orbs", "Ghost Writing", "D.O.T.S"],notes:["Ages over time: starts fast/active.", "Slows down and hunts later as it ages."]}
 ];
 
 // Detailed Ghost Info (on-site)
@@ -37,429 +79,404 @@ const GHOST_DETAILS = {
   "Spirit": {
     "threshold": "Normal (50%)",
     "traits": [
-      "No unique hunt modifiers",
-      "Smudge blocks hunts ~180s (longest)"
+      "No standout behavior besides smudge timing.",
+      "Very standard activity profile."
     ],
-    "abilities": [
-      "None distinct compared to other ghosts"
-    ],
+    "abilities": [],
     "tests": [
-      "Smudge the ghost room; if hunts resume <180s, not Spirit"
+      "Smudge in/near ghost room; if it hunts <180s later, rule out Spirit."
     ],
     "strategy": [
-      "Use 3:00 smudge timer to rule out others",
-      "Collect EMF 5, Spirit Box, Writing"
+      "Use a 3:00 smudge timer to confirm.",
+      "Collect EMF 5, Spirit Box, Writing."
     ]
   },
   "Wraith": {
     "threshold": "Normal (50%)",
     "traits": [
-      "Never leaves UV footprints in salt",
-      "Can teleport to a player (EMF 2–5)"
+      "Does not disturb salt at all (won’t step in or leave UV footprints).",
+      "Can teleport to a player and trigger EMF away from its room."
     ],
     "abilities": [
-      "Teleport ability may cause sudden EMF far from room"
+      "Random teleport can cause EMF 2 or 5 at the player’s location."
     ],
     "tests": [
-      "Salt + UV: no footprints after stepping = Wraith",
-      "Watch for teleport EMF spikes away from room"
+      "Place salt + motion sensor in a doorway—if motion trips but salt is untouched, strong Wraith tell.",
+      "Random EMF away from room can be its teleport (EMF can be 2 or 5)."
     ],
     "strategy": [
-      "Use salt traps to confirm",
-      "Track sudden EMF away from room"
+      "Rule out Wraith early with the salt + motion setup.",
+      "Keep an EMF reader on you to catch teleports."
     ]
   },
   "Phantom": {
     "threshold": "Normal (50%)",
     "traits": [
-      "Photo during event makes model disappear",
-      "Slower blink rate in hunts"
+      "Photo makes the ghost model disappear; Journal ‘Ghost’ photo shows no model.",
+      "Longer invisibility during hunts (slow blinks)."
     ],
-    "abilities": [
-      "Photo doesn’t end event; only hides model"
-    ],
+    "abilities": [],
     "tests": [
-      "Photo mid-appearance: vanish = Phantom",
-      "Compare hunt blink cadence vs Oni"
+      "Take a photo during an event—if the ghost vanishes in the photo, think Phantom.",
+      "Watch hunt flicker rate; Phantoms blink slowly."
     ],
     "strategy": [
-      "Keep a camera ready",
-      "Use blink cadence as a tell"
+      "Carry a camera for confirmation.",
+      "Use hunt blink timing to separate from Oni/Myling."
     ]
   },
   "Poltergeist": {
     "threshold": "Normal (50%)",
     "traits": [
-      "Throws multiple objects at once (burst)",
-      "More frequent/stronger throws"
+      "Throws multiple items in quick bursts (‘polter storm’).",
+      "Throws cause extra sanity loss; very throw-happy during hunts."
     ],
     "abilities": [
-      "Burst can drain sanity more"
+      "Multi-throw burst with larger sanity impact."
     ],
     "tests": [
-      "Pile items; look for multi-throw bursts",
-      "Track EMF 3 on throw chains"
+      "Pile items and watch for rapid tosses + sanity dips.",
+      "Listen for frequent throws during hunts."
     ],
     "strategy": [
-      "Bait with object piles",
-      "Stay near objects to gather throws"
+      "Bait with item piles.",
+      "Track sanity around throw bursts."
     ]
   },
   "Banshee": {
-    "threshold": "Normal (50%)",
+    "threshold": "50% based on its target only",
     "traits": [
-      "Targets a single player",
-      "Unique paramic ‘scream’"
+      "Targets a single player for hunt checks.",
+      "Unique parabolic ‘scream’ sound."
     ],
     "abilities": [
-      "Prefers singing events; target locked"
+      "May ignore non-targets during hunts and beeline to target."
     ],
     "tests": [
-      "Listen for scream on paramic",
-      "Rotate who stays in room to test targeting"
+      "Use para-mic to find the scream.",
+      "Observe if it passes non-targets to reach one player."
     ],
     "strategy": [
-      "Swap presence to manipulate target",
-      "If not target, you’re safer during hunts"
+      "Have the suspected target hide far; see if pathing seems biased.",
+      "Rotate who baits with para-mic."
     ]
   },
   "Jinn": {
     "threshold": "Normal (50%)",
     "traits": [
-      "Faster when far if breaker ON",
-      "Cannot turn breaker off directly"
+      "Faster at range when it has LoS and the breaker is ON.",
+      "Cannot directly turn breaker OFF (can still overload by many lights)."
     ],
     "abilities": [
-      "Ability EMF spikes near power"
+      "25% sanity ‘zap’ at the breaker (EMF at box)."
     ],
     "tests": [
-      "Chase with breaker ON vs OFF to see speed change"
+      "Leave EMF on the breaker and watch for a zap reading + sanity drop.",
+      "Compare chase speed at range with breaker ON."
     ],
     "strategy": [
-      "Kill breaker to remove speed-up",
-      "Use long hallway to observe"
+      "Keep breaker management in mind; avoid long LoS paths when power is on.",
+      "Use corners to cut LoS—Jinn slows up close."
     ]
   },
   "Mare": {
-    "threshold": "Earlier in dark (~60%)",
+    "threshold": "~60% in dark; ~40% in lit room",
     "traits": [
-      "Prefers lights off",
-      "Less likely to turn lights on"
+      "Prefers darkness and turns lights OFF quickly.",
+      "Will not turn a light ON."
     ],
-    "abilities": [
-      "Darkness early hunts"
-    ],
+    "abilities": [],
     "tests": [
-      "Toggle lights; Mare turns off quickly",
-      "Keep room lit to delay hunts"
+      "Toggle a light in ghost room: if it consistently turns it off, suspect Mare.",
+      "If you ever see it turn a light ON, it’s not a Mare."
     ],
     "strategy": [
-      "Control lighting to manage threshold",
-      "Force switch interactions for tells"
+      "Keep rooms lit to reduce its hunt chance.",
+      "Carry a lighter/candles for safety."
     ]
   },
   "Revenant": {
     "threshold": "Normal (50%)",
     "traits": [
-      "Very fast when chasing; very slow when not",
-      "Sharp speed phase change"
+      "Very slow (~1.0 m/s) without LoS; very fast (~3.0 m/s) when it sees you.",
+      "Speed drops sharply once LoS is broken."
     ],
-    "abilities": [
-      "Patrol slow when no LoS"
-    ],
+    "abilities": [],
     "tests": [
-      "Break LoS: if speed drops sharply → Rev"
+      "Break LoS around corners and listen for speed slump.",
+      "Compare approach speed vs search speed."
     ],
     "strategy": [
-      "Use corners to drop LoS",
-      "Smudge to reset pressure"
+      "Hide and break LoS early; avoid long chase lines.",
+      "Use its slow search phase to reposition."
     ]
   },
   "Shade": {
-    "threshold": "Normal (low activity ~35–50%)",
+    "threshold": "~35% (lowest natural threshold)",
     "traits": [
-      "Very shy near players",
-      "Unlikely to hunt if someone is in room"
+      "Very shy with players nearby; reduced events and interactions.",
+      "Rarely hunts if someone’s in its room above threshold."
     ],
-    "abilities": [
-      "Prefers interactions when alone"
-    ],
+    "abilities": [],
     "tests": [
-      "Low activity at low sanity → Shade",
-      "Leave room to force writing or events"
+      "Stand near the ghost room: if activity tanks, suspect Shade.",
+      "Try to provoke events—Shades underperform near people."
     ],
     "strategy": [
-      "Give it space for evidence",
-      "Expect slower confirmations"
+      "Split up to trigger interactions elsewhere.",
+      "Use other evidences since behaviors are subtle."
     ]
   },
   "Demon": {
-    "threshold": "Earlier (~70%)",
+    "threshold": "Up to ~70% (and ability hunts at any sanity)",
     "traits": [
-      "Shorter smudge block (~120s)",
-      "Can chain early hunts"
+      "Aggressive, short smudge block (~60s) and short hunt cooldown (~20s).",
+      "Crucifix protects with larger effective safety."
     ],
-    "abilities": [
-      "Very early hunt attempts"
-    ],
+    "abilities": [],
     "tests": [
-      "Smudge timing: <180s but ~120s → Demon"
+      "Note early hunts and chains despite smudging.",
+      "Track smudge timings vs other ghosts."
     ],
     "strategy": [
-      "Stay smudge-ready",
-      "Use pills conservatively"
+      "Carry extra smudges; stay near crucifixes.",
+      "Finish objectives quickly."
     ]
   },
   "Yurei": {
     "threshold": "Normal (50%)",
     "traits": [
-      "Strong sanity drain door slam",
-      "Less wandering when smudged in room"
+      "Door-slam ability that drains nearby sanity sharply.",
+      "Smudging its room traps it there briefly (reduced roaming)."
     ],
     "abilities": [
-      "Big sanity drain event"
+      "Area sanity drain tied to a strong door force."
     ],
     "tests": [
-      "Watch team sanity after door slam",
-      "Smudge room; observe reduced wandering"
+      "Watch door movement + team sanity drops.",
+      "Smudge the room and confirm reduced wandering."
     ],
     "strategy": [
-      "Track sanity deltas",
-      "Smudge room during testing"
+      "Keep doors noted/monitored.",
+      "Use smudge to ‘pin’ it while you gather evidence."
     ]
   },
   "Oni": {
     "threshold": "Normal (50%)",
     "traits": [
-      "More visible; fast blink",
-      "Cannot do airball event"
+      "Very active; shows itself more often; no ‘airball’ event.",
+      "Events may drain more sanity than usual."
     ],
-    "abilities": [
-      "Prefers visible models"
-    ],
+    "abilities": [],
     "tests": [
-      "If airball occurs → not Oni",
-      "Use blink rate to separate from Phantom"
+      "Many visible events vs airballs suggests Oni.",
+      "Compare hunt visibility vs Phantom (Oni shows more)."
     ],
     "strategy": [
-      "Push events for observation",
-      "Time blink cadence"
+      "Use cams to capture frequent appearances.",
+      "Expect stronger event sanity loss."
     ]
   },
   "Yokai": {
-    "threshold": "Normal (50%) / earlier near talking",
+    "threshold": "Up to ~80% if players talk near it (~50% otherwise)",
     "traits": [
-      "Reduced hearing while hunting",
-      "Talking near it can trigger early hunts"
+      "Talking near it can trigger events and earlier hunts.",
+      "During hunts it hears voices only at very close range."
     ],
-    "abilities": [
-      "Voice proximity affects hunts"
-    ],
+    "abilities": [],
     "tests": [
-      "Talk near ghost to provoke",
-      "Hide close and whisper — may not hear"
+      "Chat near it and watch for reactions.",
+      "During hunts, test voice range carefully."
     ],
     "strategy": [
-      "Be careful using voice chat",
-      "Use close hides in a pinch"
+      "Be quiet near ghost room; mute mics during hunts.",
+      "Use voice bait deliberately if you’re ready to run."
     ]
   },
   "Hantu": {
     "threshold": "Normal (50%)",
     "traits": [
-      "Faster in cold; slower in warm",
-      "Breath puffs in cold during hunt"
+      "Temperature-based speed: faster in cold, slower in warm.",
+      "No LoS speed-up unlike most ghosts."
     ],
     "abilities": [
-      "Temperature-based speed"
+      "Visible cold breath during hunts when building is cold/power off."
     ],
     "tests": [
-      "Warm house (breaker ON) to slow it",
-      "Compare speeds in different rooms"
+      "Compare speed with breaker ON vs OFF.",
+      "Check cold breath in dark corridors during hunts."
     ],
     "strategy": [
-      "Heat building to weaken",
-      "Map cold zones with thermo"
+      "Keep breaker ON to warm the map.",
+      "Kite through warmer areas."
     ]
   },
   "Goryo": {
     "threshold": "Normal (50%)",
     "traits": [
-      "DOTS on camera more than to players",
-      "Roams less from room"
+      "DOTS usually camera-only and not shown with players present.",
+      "Stays closer to its room than average."
     ],
-    "abilities": [
-      "DOTS often cam-only"
-    ],
+    "abilities": [],
     "tests": [
-      "Place camera; observe DOTS remotely",
-      "If only cam-DOTS → Goryo likely"
+      "Set a cam and leave; DOTS appears on monitor, not in-person.",
+      "If DOTS never shows while you’re in the room, suspect Goryo."
     ],
     "strategy": [
-      "Aim cam at ghost room",
-      "Combine with motion sensors"
+      "Prefer tripod-cam DOTS checks.",
+      "Cycle away from the room while monitoring."
     ]
   },
   "Myling": {
     "threshold": "Normal (50%)",
     "traits": [
-      "Quieter footsteps at distance",
-      "More paramic sounds"
+      "Quieter footsteps at range during hunts.",
+      "More sounds on parabolic mic while roaming."
     ],
-    "abilities": [
-      "Footsteps audible later than others"
-    ],
+    "abilities": [],
     "tests": [
-      "Compare step audibility vs distance",
-      "Use paramic for frequent noises"
+      "Notice footstep audio falloff sooner than expected.",
+      "Use para-mic to pick up frequent sounds."
     ],
     "strategy": [
-      "Test at range during hunt",
-      "Balance distance to survive"
+      "Keep sound cues in mind—don’t rely only on steps.",
+      "Shorten distance when listening for it in hunts."
     ]
   },
   "Onryo": {
-    "threshold": "Earlier with flame extinguish",
+    "threshold": "~60% (flames suppress hunts until ‘spent’)",
     "traits": [
-      "Extinguished flame can trigger hunt",
-      "Fears fire (candles delay hunts)"
+      "Flames act like mobile crucifixes nearby.",
+      "The third nearby blowout can trigger a hunt regardless of sanity."
     ],
-    "abilities": [
-      "Hunt roll after flame goes out"
-    ],
+    "abilities": [],
     "tests": [
-      "Place candles; track extinguish → hunt",
-      "Pull candles to provoke early hunt"
+      "Count blowouts—expect a hunt on the third.",
+      "Use candles to delay hunts until spent."
     ],
     "strategy": [
-      "Use candles for safety",
-      "Control flame timing to identify"
+      "Spread candles around the room.",
+      "Track blowouts aloud/in notes."
     ]
   },
   "The Twins": {
     "threshold": "Normal (50%)",
     "traits": [
-      "Two speeds: decoy faster, main slower",
-      "Interactions in two places"
+      "Two behaviors/speeds: slow main and faster decoy.",
+      "Interactions occur seconds apart in different places."
     ],
-    "abilities": [
-      "Decoy can mislead room location"
-    ],
+    "abilities": [],
     "tests": [
-      "Track two interaction spots",
-      "Compare step speeds"
+      "Alternate slow/fast chase speeds between hunts.",
+      "Note desynced interactions across rooms."
     ],
     "strategy": [
-      "Cover both spots with sensors",
-      "Use EMF timing + footsteps"
+      "Gear up both suspected zones.",
+      "Time footstep cadence to feel the speed swap."
     ]
   },
   "Raiju": {
-    "threshold": "Early near electronics (~65%)",
+    "threshold": "~65% near active electronics; ~50% otherwise",
     "traits": [
-      "Faster near active electronics",
-      "Can drain/affect nearby gear"
+      "Faster near active electronics (carried or placed).",
+      "Extends electronic interference range."
     ],
-    "abilities": [
-      "Electronics radius speed buff"
-    ],
+    "abilities": [],
     "tests": [
-      "Begin hunt with gear ON vs OFF",
-      "Observe speed difference"
+      "Kill electronics and compare speed.",
+      "If it ‘sprints’ near gear piles, suspect Raiju."
     ],
     "strategy": [
-      "Power down gear during hunts",
-      "Bait with electronics to confirm"
+      "Power down when leaving safe spots.",
+      "Avoid carrying active tech during hunts."
     ]
   },
   "Obake": {
     "threshold": "Normal (50%)",
     "traits": [
-      "Rare 6-finger UV handprint",
-      "Fingerprints fade faster"
+      "Fingerprints fade faster; unique 6‑finger variants.",
+      "Sometimes fails to leave prints after interactions."
     ],
     "abilities": [
-      "Odd hand shapes; faster decay"
+      "Rare shapeshift frame during hunts."
     ],
     "tests": [
-      "Look for 6-finger prints",
-      "Time fingerprint lifetime"
+      "Check prints immediately for odd patterns.",
+      "Track faster-than-normal fingerprint disappearance."
     ],
     "strategy": [
-      "Photo/UV every print quickly",
-      "Re-check surfaces soon"
+      "Carry UV right after interactions.",
+      "Photograph unusual prints quickly."
     ]
   },
   "The Mimic": {
-    "threshold": "Varies (mimics target)",
+    "threshold": "Varies (mimics another ghost)",
     "traits": [
-      "Copies behavior & speed",
-      "Always has extra Ghost Orbs"
+      "Always shows extra Ghost Orbs in addition to its three evidences.",
+      "Copies other ghosts’ behaviors, thresholds and speed."
     ],
-    "abilities": [
-      "Can flip between archetypes"
-    ],
+    "abilities": [],
     "tests": [
-      "Confirm orbs even if not expected",
-      "Watch for sudden behavior shifts"
+      "If behavior contradicts the orb list, suspect Mimic.",
+      "Confirm with Spirit Box + UV + Freezing."
     ],
     "strategy": [
-      "Keep Mimic in mind late",
-      "Don’t overfit on one behavior"
+      "Double-confirm evidence; don’t trust behavior alone.",
+      "Re-check orbs last to avoid bias."
     ]
   },
   "Moroi": {
-    "threshold": "Lower with curse (sanity-scaled)",
+    "threshold": "Normal (50%), but cursed player drains sanity faster",
     "traits": [
-      "Speed increases as sanity drops",
-      "Curses via Box/Paramic; pills remove curse only"
+      "Curses via Spirit Box/para reply → doubles passive sanity drain on that player.",
+      "Gets faster as team sanity drops; smudge blinds longer."
     ],
     "abilities": [
-      "LoS acceleration cap present"
+      "Cursed state ends when the player takes sanity pills."
     ],
     "tests": [
-      "Delay Box/Paramic early",
-      "Use pills after confirming curse"
+      "Watch the responder’s sanity crash after a reply.",
+      "Compare smudge blind time vs normal."
     ],
     "strategy": [
-      "Manage sanity tightly",
-      "Fight in lit areas when possible"
+      "Pill the cursed player quickly.",
+      "Save smudges for late game."
     ]
   },
   "Deogen": {
-    "threshold": "Normal (40–50%)",
+    "threshold": "~40%",
     "traits": [
-      "Fast at range, crawls up close",
-      "Always knows your location"
+      "Always knows your location; can’t truly hide.",
+      "Very fast when far; slows to ~0.4 m/s when near—extremely loopable."
     ],
     "abilities": [
-      "Cannot be hidden from"
+      "Unique heavy ‘breathing’ Spirit Box at point-blank range."
     ],
     "tests": [
-      "Do not hide — let it slow near you",
-      "Loop around furniture"
+      "Stand very close for the breathing Spirit Box.",
+      "Let it approach and feel the dramatic slowdown."
     ],
     "strategy": [
-      "Loop; smudge to reposition",
-      "Avoid long straight lines"
+      "Loop around furniture/pillars.",
+      "Don’t run long distances—kite it nearby."
     ]
   },
   "Thaye": {
-    "threshold": "Normal (rises as it ages)",
+    "threshold": "Ages from ~75% down to ~15%",
     "traits": [
-      "Starts fast/active; weakens over time",
-      "Ages faster with players nearby"
+      "Starts very fast/active; calms and slows as it ages.",
+      "Ages when players spend time near its room."
     ],
     "abilities": [
-      "Behavior/evidence shift with time"
+      "Ouija ‘age’ answers change over time."
     ],
     "tests": [
-      "Stay near room to age faster",
-      "Compare early vs late speeds"
+      "Track activity dropping off mid-match.",
+      "Notice longer time-to-hunt later."
     ],
     "strategy": [
-      "Prolong near-room presence",
-      "Re-test behaviors later"
+      "Play safe early; finish tasks as it slows.",
+      "Reassess behavior over time to confirm."
     ]
   }
 };
@@ -659,23 +676,29 @@ const $make=(t,p={})=>Object.assign(document.createElement(t),p);
 // Returns true if a ghost can change speed under any condition (LoS, temp, sanity, range, twin speeds, etc.)
 function ghostHasSpeedChange(name){
   const d = SPEEDS[name];
-  if(!d) return false;
+  if (!d) return false;
 
-  // Range (e.g., Hantu, Moroi, Deogen, Thaye) → has speed variance
+  // Explicit flag on the data
+  if (d.changesSpeed) return true;
+
+  // Variable ranges (e.g., Hantu, Moroi, Deogen, Thaye)
   if (Array.isArray(d.range) && d.range.length === 2 && d.range[1] > d.range[0]) return true;
 
-  // Two distinct fixed speeds (e.g., Twins)
-  if (Array.isArray(d.pair) && d.pair.length >= 2) {
-    const first = d.pair[0]?.speed;
-    if (d.pair.some(p => p.speed !== first)) return true;
-  }
+  // Dual-speed variants (e.g., The Twins)
+  if (Array.isArray(d.pair) && new Set(d.pair.map(p => p?.speed)).size > 1) return true;
 
-  // LoS-style cap or special faster state (e.g., Jinn 2.5, Revenant 3.0, Raiju 2.5)
-  if (typeof d.losCap === 'number' && typeof d.base === 'number' && d.losCap > d.base) return true;
+  // Fixed alternate states (e.g., Jinn/Revenant/Raiju with a boosted state)
+  if (Array.isArray(d.fixed) && d.fixed.some(f => typeof f.speed === 'number' && (typeof d.base !== 'number' || f.speed !== d.base))) return true;
 
-  // Otherwise: no known speed change
+  // Explicit LoS acceleration or cap
+  if (typeof d.losCap === 'number' && (typeof d.base !== 'number' || d.losCap > d.base)) return true;
+
+  // LoS flag present even without numeric cap
+  if (d.los === true) return true;
+
   return false;
 }
+
 
 
 /* Toast (bright) */
@@ -728,16 +751,7 @@ function ghostHasLoSAccel(name){
 let filterSpeedChange = false;
 
 // Find the checkbox in the HTML
-const speedChangeCheckbox = document.getElementById("filterSpeedChange");
-
-// Watch for user clicking it
-speedChangeCheckbox.addEventListener("change", () => {
-  filterSpeedChange = speedChangeCheckbox.checked;
-  renderGhosts(); // refresh the ghost list
-});
-
-
-
+// removed obsolete renderGhosts handler
 function filterGhosts(){
   const reasons = new Map();
 
@@ -909,6 +923,8 @@ xbtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="t
       // Build pieces in order
       const h   = $make('h4',{textContent:g.name});
       const meta= metaRow(g);
+      const _sp = formatSpeedSummary(g.name);
+      const speedRow = _sp ? $make('div',{className:'speedline', textContent:'Speed: ' + _sp}) : null;
       const note= $make('div',{className:'note',innerHTML:g.notes.map(n=>`• ${n}`).join('<br>')});
 
       // Optional solved banner (rename from "prompt" -> "solvedBanner")
@@ -922,11 +938,7 @@ xbtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="t
       }
 
       // Ensure banner is placed AFTER the evidence row to avoid overlap
-      if(solvedBanner){
-        card.append(h, meta, solvedBanner, note);
-      }else{
-        card.append(h, meta, note);
-      }
+      if(solvedBanner){ card.append(h, meta, ...(speedRow?[speedRow]:[]), solvedBanner, note); } else { card.append(h, meta, ...(speedRow?[speedRow]:[]), note); }
 
       grid.appendChild(card);
     });

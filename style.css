@@ -1,3 +1,4 @@
+
 :root{
   --bg:#0c0f14; --card:#11161d; --muted:#8ea0b5; --text:#e7efff; --accent:#67e8f9; --accent-2:#a78bfa; --chip:#1a2330; --border:#1d2532;
 }
@@ -234,3 +235,11 @@ details.group.dragging summary { cursor: grabbing; }
 #siteBanner { position: sticky; top: 0; z-index: 1100; }
 dialog#ghostModal { position: fixed; z-index: 5000; }
 dialog#ghostModal::backdrop { z-index: 4000; }
+
+/* Meta chips (speed) */
+.meta .meta-chip{display:inline-block;padding:2px 8px;border-radius:9999px;font-size:12px;margin:0 6px 6px 0;opacity:.9;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12)}
+.meta .meta-chip.speed{font-weight:600}
+
+
+/* Speed line below evidence */
+.speedline{margin:6px 0 2px 0;font-size:12px;opacity:.9}
